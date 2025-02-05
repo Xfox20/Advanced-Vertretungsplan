@@ -4,6 +4,7 @@ export interface ItslearningResourceElement {
 }
 
 export type Substitution = {
+  id: string;
   teacher: string;
   subject: string;
   room: string;
@@ -25,6 +26,7 @@ export type SubstitutionPlan = {
 };
 
 export type DetailedSubstitutionPlan = SubstitutionPlan & {
+  id: string;
   lastFetched: Date;
   faulty?: boolean;
 };

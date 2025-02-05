@@ -1,4 +1,5 @@
 import fs from "fs";
+import crypto from "crypto";
 
 export async function parsePlan(mdPath: string, date: Date) {
   const markdownFile = fs
@@ -50,6 +51,11 @@ function parsePdfRow(row: string[]) {
 
   const sub = row.slice(5);
 
+  // Generate a unique ID for the substitution
+  const subHash = crypto.createHash("sha256");
+  row.slice(0, 5).forEach((c) => subHash.update(c));
+  const subId = subHash.digest("hex").slice(0, 8);
+
   let subTeacher, subSubject, subRoom, note;
   if (!sub[0] || (/[A-ZÄÖÜ]{3}/.test(sub[0]) && sub[0].length < 18)) {
     // First column is actually teacher
@@ -89,6 +95,7 @@ function parsePdfRow(row: string[]) {
       }) || [];
 
   return {
+    id: subId,
     classes,
     hours: row[1].match(/\d/g)?.map(Number) || [],
     teacher: row[2],

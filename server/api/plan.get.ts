@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
 
     const json: SubstitutionPlan = JSON.parse(fs.readFileSync(path).toString());
     Object.assign(json, {
+      id: manifest.current,
       lastFetched: manifest.versions[manifest.current].lastChecked,
       faulty: manifest.versions[manifest.current].usedOcr,
     });
