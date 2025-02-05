@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-sans: "Public Sans", sans-serif;
+}
+
+* {
+  touch-action: manipulation !important;
+}
+
+button:not([disabled]) {
+  cursor: pointer;
+}

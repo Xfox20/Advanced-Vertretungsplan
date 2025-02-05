@@ -1,0 +1,30 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.24",
+    "@nuxt/ui": "next",
+    "form-data": "^4.0.1",
+    "got": "^14.4.5",
+    "node-html-parser": "^7.0.1",
+    "node-tesseract-ocr": "^2.2.1",
+    "nuxt": "^3.15.4",
+    "nuxt-cron": "1.8.0",
+    "tough-cookie": "^5.1.0",
+    "unzip-stream": "^0.3.4",
+    "vue": "latest",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/unzip-stream": "^0.3.4",
+    "git-describe": "^4.1.1"
+  }
+}
