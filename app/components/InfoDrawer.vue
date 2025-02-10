@@ -102,20 +102,13 @@ const commitHash = useRuntimeConfig().public.commitHash;
             lädt die Daten erneut vom Server herunter (ist selten erforderlich,
             weil der Plan sowieso nur alle 15 Minuten aktualisiert wird).
           </p>
-          <p class="text-sm mb-2.5">
+          <p class="text-sm mb-3.5">
             Und zuletzt: Mit
             <span class="text-[var(--ui-secondary)]">
               <UIcon name="i-lucide-file-text" class="align-[-2px] size-4" />
             </span>
             kann man die originale PDF-Datei herunterladen, falls es mal ein
             Problem gibt.
-          </p>
-          <p class="text-sm mb-3.5">
-            Außerdem sind hier überall Knöpfe zum Melden von Problemen verteilt.
-            Wenn euch irgendwas auffällt,
-            <b>meldet es bitte!</b>
-            Das Programm ist extrem anfällig für Fehler und alles selbst zu
-            überprüfen bekomme ich nicht hin.
           </p>
         </template>
       </UAccordion>

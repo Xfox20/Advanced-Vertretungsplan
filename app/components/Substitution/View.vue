@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { CalendarDate } from "@internationalized/date";
-import { ReportModal } from "#components";
 
 const { tz, locale } = inject<LocaleInfo>("locale")!;
 const selectedDate = inject<Ref<CalendarDate>>("date")!;
