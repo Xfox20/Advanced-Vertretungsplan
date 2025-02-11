@@ -1,8 +1,3 @@
-export interface ItslearningResourceElement {
-  elementUrl: string;
-  title: string;
-}
-
 export type Substitution = {
   id: string;
   teacher: string;
