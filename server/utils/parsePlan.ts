@@ -1,7 +1,7 @@
 import fs from "fs";
 import crypto from "crypto";
 
-export async function parsePlan(mdPath: string, date: Date) {
+export function parsePlan(mdPath: string, date: Date) {
   const markdownFile = fs
     .readFileSync(mdPath, "utf-8")
     .replaceAll("\\.", ".")

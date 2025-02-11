@@ -30,7 +30,7 @@ export async function fetchPlan() {
     }
     // If necessary, parse the plan
     if (pdfChanged || !fs.existsSync(`${basePath}/info.json`)) {
-      const planJson = await parsePlan(`${basePath}/data.md`, date);
+      const planJson = parsePlan(`${basePath}/data.md`, date);
       fs.writeFileSync(`${basePath}/info.json`, JSON.stringify(planJson));
     }
 
