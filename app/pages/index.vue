@@ -40,8 +40,10 @@ const {
   status: fetchStatus,
   data: plan,
   refresh,
-} = await useAsyncData<DetailedSubstitutionPlan>(() =>
-  $fetch(`/api/plan?date=${selectedDate.value.toString()}`)
+} = await useAsyncData<SubstitutionPlan>(() =>
+  $fetch<DeadSubstitutionPlan>(
+    `/api/plan?date=${selectedDate.value.toString()}`
+  ).then(revivePlan)
 );
 
 // Make it available in the footer

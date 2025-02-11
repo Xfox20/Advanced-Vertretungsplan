@@ -3,7 +3,7 @@ import { CalendarDate } from "@internationalized/date";
 
 const { tz, locale } = inject<LocaleInfo>("locale")!;
 const selectedDate = inject<Ref<CalendarDate>>("date")!;
-const { plan } = defineProps<{ plan: DetailedSubstitutionPlan }>();
+const { plan } = defineProps<{ plan: SubstitutionPlan }>();
 </script>
 
 <template>
@@ -14,7 +14,7 @@ const { plan } = defineProps<{ plan: DetailedSubstitutionPlan }>();
       {{ selectedDate.toDate(tz).toLocaleDateString(locale) }}
     </h2>
     <!-- warning banner for inaccurate data -->
-    <p v-if="plan.faulty" class="text-[var(--ui-error)]">
+    <p v-if="plan.usedOcr" class="text-[var(--ui-error)]">
       <UIcon name="i-lucide-octagon-alert" class="relative top-[2px]" />
       Achtung: Die aktuellen Daten können sehr ungenau sein.
     </p>
@@ -22,7 +22,7 @@ const { plan } = defineProps<{ plan: DetailedSubstitutionPlan }>();
     <div class="text-gray-600 dark:text-gray-400 font-semibold mb-4">
       Stand:
       {{
-        new Date(plan.updatedAt).toLocaleString(locale, {
+        plan.updatedAt.toDate(tz).toLocaleString(locale, {
           dateStyle: "short",
           timeStyle: "short",
         })
@@ -41,7 +41,7 @@ const { plan } = defineProps<{ plan: DetailedSubstitutionPlan }>();
       <div class="text-center text-gray-500">
         Zuletzt überprüft:
         {{
-          new Date(plan.lastFetched).toLocaleString(locale, {
+          plan.lastFetch.toDate(tz).toLocaleString(locale, {
             day: "2-digit",
             month: "short",
             hour: "2-digit",

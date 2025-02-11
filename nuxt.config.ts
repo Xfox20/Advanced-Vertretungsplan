@@ -1,7 +1,7 @@
 import { gitDescribeSync } from "git-describe";
 
 export default defineNuxtConfig({
-  modules: ["nuxt-cron", "@nuxt/ui"],
+  modules: ["nuxt-cron", "@nuxt/ui", "@nuxthub/core"],
   compatibilityDate: "2025-02-05",
   future: { compatibilityVersion: 4 },
   devtools: { enabled: true },
@@ -18,5 +18,8 @@ export default defineNuxtConfig({
     public: {
       commitHash: gitDescribeSync().hash,
     },
+  },
+  hub: {
+    database: true,
   },
 });
