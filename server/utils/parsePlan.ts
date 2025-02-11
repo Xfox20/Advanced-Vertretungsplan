@@ -15,11 +15,12 @@ export function parsePlan(mdPath: string, date: Date) {
       .replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)\s(\d\d):(\d\d)/, "$3-$2-$1T$4:$5")
   );
 
-  const notes = /Hinweise:\s*((?:.+?\s+)*?)\s*(?=Aufsichten|\|)/i
-    .exec(markdownFile)?.[1]
-    ?.trim()
-    .match(/[^\n].*?(?=\n+|$)/gis)
-    ?.map((m) => m.replaceAll("\n", ""));
+  const notes =
+    /Hinweise:\s*((?:.+?\s+)*?)\s*(?=Aufsichten|\|)/i
+      .exec(markdownFile)?.[1]
+      ?.trim()
+      .match(/[^\n].*?(?=\n+|$)/gis)
+      ?.map((m) => m.replaceAll("\n", "")) || [];
 
   const table = markdownFile
     .match(/\|.+\|/g)
@@ -50,11 +51,6 @@ function parsePdfRow(row: string[]) {
   }
 
   const sub = row.slice(5);
-
-  // Generate a unique ID for the substitution
-  const subHash = crypto.createHash("sha256");
-  row.slice(0, 5).forEach((c) => subHash.update(c));
-  const subId = subHash.digest("hex").slice(0, 8);
 
   let subTeacher, subSubject, subRoom, note;
   if (!sub[0] || (/[A-ZÄÖÜ]{3}/.test(sub[0]) && sub[0].length < 18)) {
@@ -94,26 +90,44 @@ function parsePdfRow(row: string[]) {
         return [s];
       }) || [];
 
+  if (Object.values(substitution).every((v) => !v)) {
+    substitution = undefined;
+  }
+
   let subject;
-  if (!substitution.teacher && !substitution.room) {
-    if (substitution.subject) {
-      subject = {
-        name: substitution.subject,
-        type: row[3],
-      };
-    }
+  if (
+    substitution &&
+    !substitution.teacher &&
+    !substitution.room &&
+    substitution.subject
+  ) {
+    subject = {
+      name: substitution.subject,
+      type: row[3],
+    };
     substitution = undefined;
   } else {
     subject = row[3];
   }
 
+  const hours = row[1].match(/\d/g)?.map(Number) || [];
+  const teacher = row[2];
+  const room = row[4];
+
+  // Generate a unique ID for the substitution
+  const subHash = crypto.createHash("sha256");
+  [classes, hours, teacher, subject, room]
+    .map((c) => JSON.stringify(c))
+    .forEach((c) => subHash.update(c));
+  const id = subHash.digest("hex").slice(0, 8);
+
   return {
-    id: subId,
+    id,
     classes,
-    hours: row[1].match(/\d/g)?.map(Number) || [],
-    teacher: row[2],
+    hours,
+    teacher,
     subject,
-    room: row[4],
+    room,
     substitution:
       substitution && Object.values(substitution).every((v) => !v)
         ? undefined
