@@ -71,7 +71,7 @@ function parsePdfRow(row: string[]) {
     } else note = sub[1];
   } else note = sub[0];
 
-  const substitution = {
+  let substitution: Substitution["substitution"] = {
     teacher: subTeacher,
     subject: subSubject,
     room: subRoom,
@@ -94,16 +94,30 @@ function parsePdfRow(row: string[]) {
         return [s];
       }) || [];
 
+  let subject;
+  if (!substitution.teacher && !substitution.room) {
+    if (substitution.subject) {
+      subject = {
+        name: substitution.subject,
+        type: row[3],
+      };
+    }
+    substitution = undefined;
+  } else {
+    subject = row[3];
+  }
+
   return {
     id: subId,
     classes,
     hours: row[1].match(/\d/g)?.map(Number) || [],
     teacher: row[2],
-    subject: row[3],
+    subject,
     room: row[4],
-    substitution: Object.values(substitution).every((v) => !v)
-      ? undefined
-      : substitution,
+    substitution:
+      substitution && Object.values(substitution).every((v) => !v)
+        ? undefined
+        : substitution,
     note,
   } as Substitution;
 }

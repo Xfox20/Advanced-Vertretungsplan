@@ -6,12 +6,12 @@ export interface ItslearningResourceElement {
 export type Substitution = {
   id: string;
   teacher: string;
-  subject: string;
+  subject: string | { name: string; type: string };
   room: string;
   substitution?: {
-    teacher: string;
-    subject: string;
-    room: string;
+    teacher?: string;
+    subject?: string;
+    room?: string;
   };
   note: string;
   classes: string[];
