@@ -16,7 +16,11 @@ provide("sub", sub);
     <!-- class, subject and hour(s) -->
     <template #header>
       <div>
-        <span class="font-semibold">{{ sub.subject }}</span>
+        <span class="font-semibold">{{
+          typeof sub.subject === "string"
+            ? sub.subject
+            : `${sub.subject.type}: ${sub.subject.name}`
+        }}</span>
         <span> ({{ sub.classes.join(", ") }})</span>
       </div>
       <div class="flex items-center gap-1 font-light">
