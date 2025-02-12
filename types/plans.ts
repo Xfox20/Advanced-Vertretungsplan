@@ -25,17 +25,6 @@ export type SubstitutionPlan = {
   usedOcr: boolean | null;
 };
 
-export type DownloadManifest = {
-  current: string;
-  versions: {
-    [key: string]: {
-      fetchedAt: Date;
-      lastChecked: Date;
-      usedOcr?: boolean;
-    };
-  };
-};
-
 export type DeadSubstitutionPlan = {
   [K in keyof SubstitutionPlan]: SubstitutionPlan[K] extends
     | CalendarDate

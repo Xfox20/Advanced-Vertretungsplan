@@ -1,7 +1,8 @@
+import { CalendarDate, parseDateTime } from "@internationalized/date";
 import fs from "fs";
 import crypto from "crypto";
 
-export function parsePlan(mdPath: string, date: Date) {
+export function parsePlan(mdPath: string, date: CalendarDate) {
   const markdownFile = fs
     .readFileSync(mdPath, "utf-8")
     .replaceAll("\\.", ".")
@@ -9,7 +10,7 @@ export function parsePlan(mdPath: string, date: Date) {
     .replaceAll(/`\s*`/g, "")
     .replaceAll("\r\n", "\n");
 
-  const updatedAt = new Date(
+  const updatedAt = parseDateTime(
     /Stand: (.*)/i
       .exec(markdownFile)![1]
       .replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)\s(\d\d):(\d\d)/, "$3-$2-$1T$4:$5")
@@ -27,14 +28,14 @@ export function parsePlan(mdPath: string, date: Date) {
     ?.map((row) => row.slice(1, -1).split("|"));
   const changes = table?.filter((row) => /\d/.test(row[1]));
 
-  const substitutions = changes?.map(parsePdfRow);
+  const substitutions = changes?.map(parsePdfRow) ?? [];
 
   return {
     date,
     updatedAt,
     notes,
     substitutions,
-  } as SubstitutionPlan;
+  };
 }
 
 function parsePdfRow(row: string[]) {
@@ -91,7 +92,7 @@ function parsePdfRow(row: string[]) {
       }) || [];
 
   if (Object.values(substitution).every((v) => !v)) {
-    substitution = undefined;
+    substitution = null;
   }
 
   let subject;
@@ -105,7 +106,7 @@ function parsePdfRow(row: string[]) {
       name: substitution.subject,
       type: row[3],
     };
-    substitution = undefined;
+    substitution = null;
   } else {
     subject = row[3];
   }

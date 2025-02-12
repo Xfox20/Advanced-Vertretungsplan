@@ -9,12 +9,20 @@ export default defineEventHandler(async (event) => {
 
   const calendarDate = parseDate(date);
 
-  const plan: SubstitutionPlan | undefined =
-    await useDrizzle().query.plan.findFirst({
-      where: (table, { eq }) => eq(table.date, calendarDate),
-      columns: { downloadHash: false },
-      with: { substitutions: { columns: { planId: false } } },
-    });
+  const dbPlan = await useDrizzle().query.plan.findFirst({
+    where: (table, { eq }) => eq(table.date, calendarDate),
+    with: { substitutions: { columns: { planId: false } } },
+  });
+  if (!dbPlan) return createError({ statusCode: 404 });
 
-  return plan ?? createError({ statusCode: 404 });
+  const downloadInfo = await useDrizzle().query.download.findFirst({
+    where: (table, { eq }) => eq(table.hash, dbPlan.downloadHash),
+  });
+  if (!downloadInfo) return createError({ statusCode: 500 });
+
+  return {
+    ...(({ downloadHash: _, ...r }) => r)(dbPlan),
+    firstFetch: downloadInfo.firstFetch,
+    lastFetch: downloadInfo.lastFetch,
+  } as SubstitutionPlan;
 });

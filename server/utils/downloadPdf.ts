@@ -1,7 +1,14 @@
+import {
+  getLocalTimeZone,
+  now,
+  parseDate,
+  toCalendarDateTime,
+  today,
+} from "@internationalized/date";
 import { parse } from "node-html-parser";
 import got from "got";
 import { CookieJar } from "tough-cookie";
-import fs, { mkdir, mkdirSync } from "fs";
+import fs, { mkdirSync } from "fs";
 import crypto from "crypto";
 import { Transform } from "stream";
 import { pipeline } from "stream/promises";
@@ -33,16 +40,15 @@ export async function downloadPdf() {
 
   let date, datePath;
   if (dateString) {
-    date = new Date(dateString);
+    date = parseDate(dateString);
     datePath = getDatePath(date);
   } else {
-    date = new Date();
-    datePath = "server/data/plans/unknown";
+    return null;
   }
 
   mkdirSync(datePath, { recursive: true });
 
-  const fetchedAt = new Date();
+  const fetchedAt = toCalendarDateTime(now("Europe/Berlin"));
   const { hash, changed } = await downloadFile(cookieJar, url, datePath);
 
   if (!dateString) {

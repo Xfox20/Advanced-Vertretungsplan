@@ -1,3 +1,4 @@
+import { CalendarDate } from "@internationalized/date";
 import fs from "fs";
 
 export async function fetchPlan() {
@@ -10,41 +11,61 @@ export async function fetchPlan() {
   const datePath = getDatePath(date);
   const basePath = `${datePath}/${hash}`;
 
-  // Load manifest
-  const manifestPath = `${datePath}/manifest.json`;
-  const manifest: DownloadManifest = fs.existsSync(manifestPath)
-    ? JSON.parse(fs.readFileSync(manifestPath, "utf-8"))
-    : { current: "", versions: {} };
+  let usedOcr = false;
 
-  // Update manifest
-  manifest.versions[hash] = {
-    fetchedAt: manifest.versions[hash]?.fetchedAt || fetchedAt,
-    lastChecked: fetchedAt,
-    usedOcr: manifest.versions[hash]?.usedOcr,
-  };
+  // Get download info if it exists
+  const downloadInfo = await useDrizzle().query.download.findFirst({
+    where: (table, { eq }) => eq(table.hash, hash),
+    columns: { hash: false },
+  });
 
   try {
     // If necessary, convert the PDF to markdown
     if (pdfChanged || !fs.existsSync(`${basePath}/data.md`)) {
-      manifest.versions[hash].usedOcr = await convertToMarkdown(basePath);
+      usedOcr = await convertToMarkdown(basePath);
     }
     // If necessary, parse the plan
     if (pdfChanged || !fs.existsSync(`${basePath}/info.json`)) {
-      const planJson = parsePlan(`${basePath}/data.md`, date);
-      fs.writeFileSync(`${basePath}/info.json`, JSON.stringify(planJson));
-    }
+      const parsedPlan = parsePlan(`${basePath}/data.md`, date);
 
-    // If everything succeeds, update the current version
-    manifest.current = hash;
+      // Insert plan version
+      await useDrizzle()
+        .insert(tables.plan)
+        .values({
+          ...parsedPlan,
+          id: hash,
+          downloadHash: hash,
+          usedOcr,
+        });
+
+      // Insert all substitutions
+      await useDrizzle()
+        .insert(tables.substitution)
+        .values(
+          parsedPlan.substitutions.map((sub) => ({
+            ...sub,
+            planId: hash,
+          }))
+        );
+    }
   } finally {
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+    // Update download info
+    await useDrizzle()
+      .insert(tables.download)
+      .values({
+        hash,
+        firstFetch: fetchedAt,
+        lastFetch: fetchedAt,
+      })
+      .onConflictDoUpdate({
+        target: tables.download.hash,
+        set: { lastFetch: fetchedAt },
+      });
   }
 }
 
-export function getDatePath(date: Date) {
-  return `server/data/plans/${date.getFullYear()}/${
-    date.getMonth() + 1
-  }/${date.getDate()}`;
+export function getDatePath(date: CalendarDate) {
+  return `server/data/plans/${date.year}/${date.month}/${date.day}`;
 }
 
 export function getPlanDiff(plan1: SubstitutionPlan, plan2: SubstitutionPlan) {

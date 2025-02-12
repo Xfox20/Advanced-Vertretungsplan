@@ -26,18 +26,30 @@ const calendarDateTime = customType<{ data: CalendarDateTime }>({
     new PortableCalendarDateTime(parseDateTime(value)),
 });
 
+export const download = sqliteTable("Download", {
+  hash: text().notNull().primaryKey(),
+  firstFetch: calendarDateTime().notNull(),
+  lastFetch: calendarDateTime().notNull(),
+})
+
+export const downloadRelations = relations(download, ({ one }) => ({
+  plan: one(plan),
+}));
+
 export const plan = sqliteTable("Plan", {
   id: text().primaryKey(),
   downloadHash: text().notNull(),
   date: calendarDate().notNull(),
   updatedAt: calendarDateTime().notNull(),
   notes: text({ mode: "json" }).$type<string[]>().notNull(),
-  firstFetch: calendarDateTime().notNull(),
-  lastFetch: calendarDateTime().notNull(),
   usedOcr: integer({ mode: "boolean" }),
 });
 
-export const planVersionRelations = relations(plan, ({ many }) => ({
+export const planVersionRelations = relations(plan, ({ one, many }) => ({
+  download: one(download, {
+    fields: [plan.downloadHash],
+    references: [download.hash],
+  }),
   substitutions: many(substitution),
 }));
 
@@ -60,6 +72,6 @@ export const substitution = sqliteTable(
 export const substitutionRelations = relations(substitution, ({ one }) => ({
   plan: one(plan, {
     fields: [substitution.planId],
-    references: [plan.id],
+    references: [plan.downloadHash],
   }),
 }));
