@@ -1,41 +1,77 @@
-import { CalendarDate, parseDateTime } from "@internationalized/date";
-import fs from "fs";
+import {
+  CalendarDate,
+  parseDate,
+  parseDateTime,
+} from "@internationalized/date";
 import crypto from "crypto";
+import { BatchItem } from "drizzle-orm/batch";
 
-export function parsePlan(mdPath: string, date: CalendarDate) {
-  const markdownFile = fs
-    .readFileSync(mdPath, "utf-8")
-    .replaceAll("\\.", ".")
-    .replaceAll("**", "")
-    .replaceAll(/`\s*`/g, "")
-    .replaceAll("\r\n", "\n");
+export async function parsePlan(
+  downloadHash: string,
+  date?: CalendarDate | null,
+  usedOcr: boolean = false
+) {
+  const markdownBlob = await hubBlob().get(`plans/${downloadHash}/data.md`);
+  if (!markdownBlob) throw new Error("File not found");
 
-  const updatedAt = parseDateTime(
-    /Stand: (.*)/i
-      .exec(markdownFile)![1]
-      .replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)\s(\d\d):(\d\d)/, "$3-$2-$1T$4:$5")
-  );
+  const markdown = await markdownBlob
+    .text()
+    .then((text) =>
+      text
+        .replaceAll("\\.", ".")
+        .replaceAll("**", "")
+        .replaceAll(/`\s*`/g, "")
+        .replaceAll("\r\n", "\n")
+    );
+
+  if (!date) {
+    date = parseLocalizedDate(
+      markdown.match(/Vertretungsplan .*? (\d+\.\d+\.\d+)/i)![1]
+    );
+  }
+
+  const updatedAt = parseLocalizedDateTime(/Stand: (.*)/i.exec(markdown)![1]);
 
   const notes =
     /Hinweise:\s*((?:.+?\s+)*?)\s*(?=Aufsichten|\|)/i
-      .exec(markdownFile)?.[1]
+      .exec(markdown)?.[1]
       ?.trim()
       .match(/[^\n].*?(?=\n+|$)/gis)
       ?.map((m) => m.replaceAll("\n", "")) || [];
 
-  const table = markdownFile
+  const table = markdown
     .match(/\|.+\|/g)
     ?.map((row) => row.slice(1, -1).split("|"));
   const changes = table?.filter((row) => /\d/.test(row[1]));
 
   const substitutions = changes?.map(parsePdfRow) ?? [];
 
-  return {
-    date,
-    updatedAt,
-    notes,
-    substitutions,
-  };
+  const parsedPlan = { date, updatedAt, notes, substitutions };
+
+  // Insert plan version
+  await useDrizzle()
+    .insert(tables.plan)
+    .values({
+      ...parsedPlan,
+      id: downloadHash,
+      downloadHash,
+      usedOcr,
+    });
+
+  // Insert substitutions
+  if (substitutions.length) {
+    await useDrizzle().batch(
+      substitutions.map(
+        (sub) =>
+          useDrizzle()
+            .insert(tables.substitution)
+            .values({
+              ...sub,
+              planId: downloadHash,
+            }) as BatchItem<"sqlite">
+      ) as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]]
+    );
+  }
 }
 
 function parsePdfRow(row: string[]) {
@@ -135,4 +171,22 @@ function parsePdfRow(row: string[]) {
         : substitution,
     note,
   } as Substitution;
+}
+
+function parseLocalizedDate(dateString: string) {
+  return parseDate(
+    dateString.replace(
+      /(\d\d)\.(\d\d)\.(\d\d\d\d)/,
+      (_, p1, p2, p3) => `${p3}-${p2}-${p1}`
+    )
+  );
+}
+
+function parseLocalizedDateTime(dateString: string) {
+  return parseDateTime(
+    dateString.replace(
+      /(\d\d)\.(\d\d)\.(\d\d\d\d)\s(\d\d):(\d\d)/,
+      (_, p1, p2, p3, p4, p5) => `${p3}-${p2}-${p1}T${p4}:${p5}`
+    )
+  );
 }
