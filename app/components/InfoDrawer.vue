@@ -69,14 +69,17 @@ const commitHash = useRuntimeConfig().public.commitHash;
               target="_blank"
               >eine API</a
             >. Das Ergebnis ist im Markdown-Format und wird dann mit einem
-            selbstgeschriebenen Parser analysiert und als JSON gespeichert.
+            selbstgeschriebenen Parser analysiert und in der Datenbank
+            gespeichert.
           </p>
           <p class="text-sm mb-3.5">
             Hinsichtlich der Web App selbst &ndash; das Ganze läuft auf einem
-            <a href="https://nuxt.com" target="_blank">Nuxt</a>-Server; das
-            Frontend verwendet
+            Cloudflare-Server über
+            <a href="https://hub.nuxt.com" target="_blank">NuxtHub</a>. Das
+            Frontend habe ich mit
             <a href="https://ui.nuxt.com" target="_blank">Nuxt UI</a> und
-            <a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a>.
+            <a href="https://tailwindcss.com" target="_blank">Tailwind CSS</a>
+            gemacht.
           </p>
         </template>
         <template #manual>
