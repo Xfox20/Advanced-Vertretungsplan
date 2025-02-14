@@ -31,5 +31,9 @@
     "drizzle-kit": "^0.30.4",
     "git-describe": "^4.1.1",
     "wrangler": "^3.109.0"
+  },
+  "resolutions": {
+    "unenv": "1.10.0",
+    "@szmarczak/http-timer": "4.0.6"
   }
 }
