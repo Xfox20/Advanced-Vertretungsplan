@@ -1,32 +1,28 @@
-import fs from "fs";
+import { parseDate } from "@internationalized/date";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
   const { date } = await getValidatedQuery(
     event,
-    z.object({ date: z.coerce.date() }).parse
+    z.object({ date: z.string().regex(/^\d\d\d\d-\d\d-\d\d$/) }).parse
   );
 
-  const basePath = getDatePath(date);
+  const calendarDate = parseDate(date);
 
-  try {
-    const manifestPath = fs.realpathSync(`${basePath}/manifest.json`);
+  const dbPlan = await useDrizzle().query.plan.findFirst({
+    where: (table, { eq }) => eq(table.date, calendarDate),
+    with: { substitutions: { columns: { planId: false } } },
+  });
+  if (!dbPlan) return createError({ statusCode: 404 });
 
-    const manifest: DownloadManifest = JSON.parse(
-      fs.readFileSync(manifestPath).toString()
-    );
+  const downloadInfo = await useDrizzle().query.download.findFirst({
+    where: (table, { eq }) => eq(table.hash, dbPlan.downloadHash),
+  });
+  if (!downloadInfo) return createError({ statusCode: 500 });
 
-    const path = fs.realpathSync(`${basePath}/${manifest.current}/info.json`);
-
-    const json: SubstitutionPlan = JSON.parse(fs.readFileSync(path).toString());
-    Object.assign(json, {
-      id: manifest.current,
-      lastFetched: manifest.versions[manifest.current].lastChecked,
-      faulty: manifest.versions[manifest.current].usedOcr,
-    });
-
-    return json as DetailedSubstitutionPlan;
-  } catch {
-    return createError({ statusCode: 404 });
-  }
+  return {
+    ...(({ downloadHash: _, ...r }) => r)(dbPlan),
+    firstFetch: downloadInfo.firstFetch,
+    lastFetch: downloadInfo.lastFetch,
+  } as SubstitutionPlan;
 });

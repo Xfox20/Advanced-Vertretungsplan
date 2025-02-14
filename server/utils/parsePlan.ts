@@ -1,39 +1,77 @@
-import fs from "fs";
+import {
+  CalendarDate,
+  parseDate,
+  parseDateTime,
+} from "@internationalized/date";
 import crypto from "crypto";
+import { BatchItem } from "drizzle-orm/batch";
 
-export async function parsePlan(mdPath: string, date: Date) {
-  const markdownFile = fs
-    .readFileSync(mdPath, "utf-8")
-    .replaceAll("\\.", ".")
-    .replaceAll("**", "")
-    .replaceAll(/`\s*`/g, "")
-    .replaceAll("\r\n", "\n");
+export async function parsePlan(
+  downloadHash: string,
+  date?: CalendarDate | null,
+  usedOcr: boolean = false
+) {
+  const markdownBlob = await hubBlob().get(`plans/${downloadHash}/data.md`);
+  if (!markdownBlob) throw new Error("File not found");
 
-  const updatedAt = new Date(
-    /Stand: (.*)/i
-      .exec(markdownFile)![1]
-      .replace(/(\d\d)\.(\d\d)\.(\d\d\d\d)\s(\d\d):(\d\d)/, "$3-$2-$1T$4:$5")
-  );
+  const markdown = await markdownBlob
+    .text()
+    .then((text) =>
+      text
+        .replaceAll("\\.", ".")
+        .replaceAll("**", "")
+        .replaceAll(/`\s*`/g, "")
+        .replaceAll("\r\n", "\n")
+    );
 
-  const notes = /Hinweise:\s*((?:.+?\s+)*?)\s*(?=Aufsichten|\|)/i
-    .exec(markdownFile)?.[1]
-    ?.trim()
-    .match(/[^\n].*?(?=\n+|$)/gis)
-    ?.map((m) => m.replaceAll("\n", ""));
+  if (!date) {
+    date = parseLocalizedDate(
+      markdown.match(/Vertretungsplan .*? (\d+\.\d+\.\d+)/i)![1]
+    );
+  }
 
-  const table = markdownFile
+  const updatedAt = parseLocalizedDateTime(/Stand: (.*)/i.exec(markdown)![1]);
+
+  const notes =
+    /Hinweise:\s*((?:.+?\s+)*?)\s*(?=Aufsichten|\|)/i
+      .exec(markdown)?.[1]
+      ?.trim()
+      .match(/[^\n].*?(?=\n+|$)/gis)
+      ?.map((m) => m.replaceAll("\n", "")) || [];
+
+  const table = markdown
     .match(/\|.+\|/g)
     ?.map((row) => row.slice(1, -1).split("|"));
   const changes = table?.filter((row) => /\d/.test(row[1]));
 
-  const substitutions = changes?.map(parsePdfRow);
+  const substitutions = changes?.map(parsePdfRow) ?? [];
 
-  return {
-    date,
-    updatedAt,
-    notes,
-    substitutions,
-  } as SubstitutionPlan;
+  const parsedPlan = { date, updatedAt, notes, substitutions };
+
+  // Insert plan version
+  await useDrizzle()
+    .insert(tables.plan)
+    .values({
+      ...parsedPlan,
+      id: downloadHash,
+      downloadHash,
+      usedOcr,
+    });
+
+  // Insert substitutions
+  if (substitutions.length) {
+    await useDrizzle().batch(
+      substitutions.map(
+        (sub) =>
+          useDrizzle()
+            .insert(tables.substitution)
+            .values({
+              ...sub,
+              planId: downloadHash,
+            }) as BatchItem<"sqlite">
+      ) as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]]
+    );
+  }
 }
 
 function parsePdfRow(row: string[]) {
@@ -51,11 +89,6 @@ function parsePdfRow(row: string[]) {
 
   const sub = row.slice(5);
 
-  // Generate a unique ID for the substitution
-  const subHash = crypto.createHash("sha256");
-  row.slice(0, 5).forEach((c) => subHash.update(c));
-  const subId = subHash.digest("hex").slice(0, 8);
-
   let subTeacher, subSubject, subRoom, note;
   if (!sub[0] || (/[A-ZÄÖÜ]{3}/.test(sub[0]) && sub[0].length < 18)) {
     // First column is actually teacher
@@ -71,7 +104,7 @@ function parsePdfRow(row: string[]) {
     } else note = sub[1];
   } else note = sub[0];
 
-  const substitution = {
+  let substitution: Substitution["substitution"] = {
     teacher: subTeacher,
     subject: subSubject,
     room: subRoom,
@@ -94,16 +127,66 @@ function parsePdfRow(row: string[]) {
         return [s];
       }) || [];
 
+  if (Object.values(substitution).every((v) => !v)) {
+    substitution = null;
+  }
+
+  let subject;
+  if (
+    substitution &&
+    !substitution.teacher &&
+    !substitution.room &&
+    substitution.subject
+  ) {
+    subject = {
+      name: substitution.subject,
+      type: row[3],
+    };
+    substitution = null;
+  } else {
+    subject = row[3];
+  }
+
+  const hours = row[1].match(/\d/g)?.map(Number) || [];
+  const teacher = row[2];
+  const room = row[4];
+
+  // Generate a unique ID for the substitution
+  const subHash = crypto.createHash("sha256");
+  [classes, hours, teacher, subject, room]
+    .map((c) => JSON.stringify(c))
+    .forEach((c) => subHash.update(c));
+  const id = subHash.digest("hex").slice(0, 8);
+
   return {
-    id: subId,
+    id,
     classes,
-    hours: row[1].match(/\d/g)?.map(Number) || [],
-    teacher: row[2],
-    subject: row[3],
-    room: row[4],
-    substitution: Object.values(substitution).every((v) => !v)
-      ? undefined
-      : substitution,
+    hours,
+    teacher,
+    subject,
+    room,
+    substitution:
+      substitution && Object.values(substitution).every((v) => !v)
+        ? undefined
+        : substitution,
     note,
   } as Substitution;
+}
+
+function parseLocalizedDate(dateString: string) {
+  return parseDate(
+    dateString.replace(
+      /(\d\d)\.(\d\d)\.(\d\d\d\d)/,
+      (_, p1, p2, p3) => `${p3}-${p2}-${p1}`
+    )
+  );
+}
+
+function parseLocalizedDateTime(dateString: string) {
+  return parseDateTime(
+    dateString.replace(
+      /(\d\d)\.(\d\d)\.(\d\d\d\d)\s(\d\d):(\d\d)/,
+      (_, p1, p2, p3, p4, p5) => `${p3}-${p2}-${p1}T${p4}:${p5}`
+    )
+  );
 }

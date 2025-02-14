@@ -1,43 +1,34 @@
-export interface ItslearningResourceElement {
-  elementUrl: string;
-  title: string;
-}
+import { CalendarDate, CalendarDateTime } from "@internationalized/date";
 
 export type Substitution = {
   id: string;
-  teacher: string;
-  subject: string;
-  room: string;
-  substitution?: {
-    teacher: string;
-    subject: string;
-    room: string;
-  };
-  note: string;
   classes: string[];
   hours: number[];
+  teacher: string | null;
+  subject: string | { name: string; type: string };
+  room: string | null;
+  substitution: {
+    teacher?: string | null;
+    subject?: string | null;
+    room?: string | null;
+  } | null;
+  note: string | null;
 };
 
 export type SubstitutionPlan = {
-  date: Date;
-  updatedAt: Date;
+  date: CalendarDate;
+  updatedAt: CalendarDateTime;
   notes: string[];
   substitutions: Substitution[];
+  firstFetch: CalendarDateTime;
+  lastFetch: CalendarDateTime;
+  usedOcr: boolean | null;
 };
 
-export type DetailedSubstitutionPlan = SubstitutionPlan & {
-  id: string;
-  lastFetched: Date;
-  faulty?: boolean;
-};
-
-export type DownloadManifest = {
-  current: string;
-  versions: {
-    [key: string]: {
-      fetchedAt: Date;
-      lastChecked: Date;
-      usedOcr?: boolean;
-    };
-  };
+export type DeadSubstitutionPlan = {
+  [K in keyof SubstitutionPlan]: SubstitutionPlan[K] extends
+    | CalendarDate
+    | CalendarDateTime
+    ? string
+    : SubstitutionPlan[K];
 };

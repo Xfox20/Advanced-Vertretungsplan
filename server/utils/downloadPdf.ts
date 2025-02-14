@@ -1,10 +1,8 @@
+import { now, parseDate, toCalendarDateTime } from "@internationalized/date";
 import { parse } from "node-html-parser";
 import got from "got";
 import { CookieJar } from "tough-cookie";
-import fs, { mkdir, mkdirSync } from "fs";
 import crypto from "crypto";
-import { Transform } from "stream";
-import { pipeline } from "stream/promises";
 
 export async function downloadPdf() {
   const cookieJar = new CookieJar();
@@ -31,30 +29,11 @@ export async function downloadPdf() {
     .reverse()
     .join("-");
 
-  let date, datePath;
-  if (dateString) {
-    date = new Date(dateString);
-    datePath = getDatePath(date);
-  } else {
-    date = new Date();
-    datePath = "server/data/plans/unknown";
-  }
+  const date = dateString ? parseDate(dateString) : null;
 
-  mkdirSync(datePath, { recursive: true });
+  const { hash, changed, fetchedAt } = await downloadFile(cookieJar, url);
 
-  const fetchedAt = new Date();
-  const { hash, changed } = await downloadFile(cookieJar, url, datePath);
-
-  if (!dateString) {
-    return null;
-  }
-
-  return {
-    changed,
-    date,
-    fetchedAt,
-    hash,
-  };
+  return { changed, date, fetchedAt, hash };
 }
 
 async function itslearningLogin(cookieJar: CookieJar) {
@@ -214,40 +193,38 @@ async function getItslearningDownloadInfo(
   };
 }
 
-async function downloadFile(
-  cookieJar: CookieJar,
-  url: string,
-  datePath: string
-) {
-  const fileHash = crypto.createHash("sha1");
+async function downloadFile(cookieJar: CookieJar, url: string) {
+  const hashGenerator = crypto.createHash("sha1");
 
-  const hashTransform = new Transform({
-    transform(chunk, _, callback) {
-      fileHash.update(chunk);
-      callback(null, chunk);
-    },
-  });
+  const fetchedAt = toCalendarDateTime(now("Europe/Berlin"));
 
-  const tempPath = `${datePath}/temp.pdf`;
-  const fileWriteStream = fs.createWriteStream(tempPath);
+  const buffer = await got
+    .get(url, { cookieJar, responseType: "buffer" })
+    .then((response) => {
+      hashGenerator.update(response.body);
+      return response.body;
+    });
 
-  await pipeline(
-    got.stream(url, { cookieJar }),
-    hashTransform,
-    fileWriteStream
-  );
+  const hash = hashGenerator.digest("hex");
 
-  const finalHash = fileHash.digest("hex");
+  const upsertResult = await useDrizzle()
+    .insert(tables.download)
+    .values({
+      hash,
+      firstFetch: fetchedAt,
+      lastFetch: fetchedAt,
+    })
+    .onConflictDoUpdate({
+      target: tables.download.hash,
+      set: { lastFetch: fetchedAt },
+    });
 
-  mkdirSync(`${datePath}/${finalHash}`, { recursive: true });
-  const finalPath = `${datePath}/${finalHash}/download.pdf`;
+  const changed = !!upsertResult.meta.rows_read;
 
-  const changed = !fs.existsSync(finalPath);
-  fs.renameSync(tempPath, finalPath);
+  const arrayBuffer = new ArrayBuffer(buffer.length);
+  new Uint8Array(arrayBuffer).set(buffer);
 
-  return {
-    changed,
-    hash: finalHash,
-    pdfPath: finalPath,
-  };
+  hubBlob().put(`/plans/${hash}/download.pdf`, arrayBuffer);
+
+  return { changed, hash, fetchedAt };
 }

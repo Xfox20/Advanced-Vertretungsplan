@@ -1,29 +1,26 @@
 import { z } from "zod";
-import fs from "fs";
+import { parseDate } from "@internationalized/date";
 
 export default defineEventHandler(async (event) => {
   const { date } = await getValidatedQuery(
     event,
-    z.object({ date: z.coerce.date() }).parse
+    z.object({ date: z.string().regex(/^\d\d\d\d-\d\d-\d\d$/) }).parse
   );
 
-  const basePath = `server/data/plans/${date.getFullYear()}/${
-    date.getMonth() + 1
-  }/${date.getDate()}`;
+  const calendarDate = parseDate(date);
 
-  try {
-    const manifestPath = fs.realpathSync(`${basePath}/manifest.json`);
+  const downloadHash = await useDrizzle()
+    .select()
+    .from(tables.plan)
+    .where(eq(tables.plan.date, calendarDate))
+    .leftJoin(
+      tables.download,
+      eq(tables.plan.downloadHash, tables.download.hash)
+    )
+    .orderBy(desc(tables.plan.updatedAt))
+    .then((ps) => ps[0].Plan.downloadHash);
 
-    const manifest: DownloadManifest = JSON.parse(
-      fs.readFileSync(manifestPath).toString()
-    );
+  if (!downloadHash) return createError({ statusCode: 404 });
 
-    const path = fs.realpathSync(
-      `${basePath}/${manifest.current}/download.pdf`
-    );
-
-    return fs.createReadStream(path);
-  } catch {
-    return createError({ statusCode: 404 });
-  }
+  return hubBlob().serve(event, `plans/${downloadHash}/download.pdf`);
 });
