@@ -224,7 +224,7 @@ async function downloadFile(cookieJar: CookieJar, url: string) {
   const arrayBuffer = new ArrayBuffer(buffer.length);
   new Uint8Array(arrayBuffer).set(buffer);
 
-  hubBlob().put(`/plans/${hash}/download.pdf`, arrayBuffer);
+  hubBlob().put(`plans/${hash}/download.pdf`, arrayBuffer);
 
   return { changed, hash, fetchedAt };
 }
