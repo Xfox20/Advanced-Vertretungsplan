@@ -46,8 +46,8 @@ const {
   ).then(revivePlan)
 );
 
-// Make it available in the footer
 provide("refreshPlan", refresh);
+provide("plan", plan);
 
 const selectedIsWeekend = computed(() => isWeekend(selectedDate.value, locale));
 

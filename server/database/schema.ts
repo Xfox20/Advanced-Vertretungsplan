@@ -1,6 +1,8 @@
 import {
   customType,
   primaryKey,
+  foreignKey,
+  uniqueIndex,
   sqliteTable,
   text,
   integer,
@@ -30,7 +32,7 @@ export const download = sqliteTable("Download", {
   hash: text().notNull().primaryKey(),
   firstFetch: calendarDateTime().notNull(),
   lastFetch: calendarDateTime().notNull(),
-})
+});
 
 export const downloadRelations = relations(download, ({ one }) => ({
   plan: one(plan),
@@ -75,3 +77,35 @@ export const substitutionRelations = relations(substitution, ({ one }) => ({
     references: [plan.downloadHash],
   }),
 }));
+
+export const planReport = sqliteTable("PlanReport", {
+  planId: text()
+    .primaryKey()
+    .references(() => plan.id),
+  type: text({
+    enum: ["missing", "many-missing", "info", "other"],
+  }).notNull(),
+  comment: text(),
+  resolved: integer({ mode: "boolean" }).notNull().default(false),
+});
+
+export const substitutionReport = sqliteTable(
+  "SubstitutionReport",
+  {
+    planId: text()
+      .notNull()
+      .references(() => plan.id),
+    substitutionId: text().notNull(),
+    type: text({
+      enum: ["missing", "wrong", "scrambled"],
+    }).notNull(),
+    resolved: integer({ mode: "boolean" }).notNull().default(false),
+  },
+  (table) => [
+    primaryKey({ columns: [table.planId, table.substitutionId] }),
+    foreignKey({
+      columns: [table.planId, table.substitutionId],
+      foreignColumns: [substitution.planId, substitution.id],
+    }),
+  ]
+);

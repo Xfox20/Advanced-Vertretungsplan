@@ -1,9 +1,20 @@
 <script lang="ts" setup>
 import { CalendarDate } from "@internationalized/date";
+import { ReportModal } from "#components";
 
 const { tz, locale } = inject<LocaleInfo>("locale")!;
 const selectedDate = inject<Ref<CalendarDate>>("date")!;
 const { plan } = defineProps<{ plan: SubstitutionPlan }>();
+
+const reportModal = useModal();
+const openReportModal = () => {
+  reportModal.open(ReportModal, {
+    date: selectedDate?.value,
+    tz,
+    locale,
+    planId: plan.id,
+  });
+};
 </script>
 
 <template>
@@ -49,6 +60,15 @@ const { plan } = defineProps<{ plan: SubstitutionPlan }>();
           })
         }}
       </div>
+      <!-- report button -->
+      <UButton
+        variant="link"
+        icon="i-lucide-circle-ellipsis"
+        @click="openReportModal"
+        class="text-center"
+      >
+        Problem melden
+      </UButton>
     </div>
   </main>
 </template>

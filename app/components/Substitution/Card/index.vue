@@ -1,6 +1,7 @@
 <script setup lang="ts">
-const { substitution: sub } = defineProps<{
+const { substitution: sub, disableContextMenu } = defineProps<{
   substitution: Substitution;
+  disableContextMenu?: boolean;
 }>();
 provide("sub", sub);
 </script>
@@ -27,6 +28,7 @@ provide("sub", sub);
         {{
           sub.hours.map((h) => h + ".").join(sub.hours.length < 3 ? "/" : ",")
         }}
+        <SubstitutionCardContextMenu v-if="!disableContextMenu" />
       </div>
     </template>
     <!-- in case of substitution: subject, teacher and room -->
