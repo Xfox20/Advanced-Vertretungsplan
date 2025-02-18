@@ -89,6 +89,13 @@ export const planReport = sqliteTable("PlanReport", {
   resolved: integer({ mode: "boolean" }).notNull().default(false),
 });
 
+export const planReportRelations = relations(planReport, ({ one }) => ({
+  plan: one(plan, {
+    fields: [planReport.planId],
+    references: [plan.id],
+  }),
+}));
+
 export const substitutionReport = sqliteTable(
   "SubstitutionReport",
   {
@@ -108,4 +115,18 @@ export const substitutionReport = sqliteTable(
       foreignColumns: [substitution.planId, substitution.id],
     }),
   ]
+);
+
+export const substitutionReportRelations = relations(
+  substitutionReport,
+  ({ one }) => ({
+    plan: one(plan, {
+      fields: [substitutionReport.planId],
+      references: [plan.id],
+    }),
+    substitution: one(substitution, {
+      fields: [substitutionReport.substitutionId],
+      references: [substitution.id],
+    }),
+  })
 );

@@ -29,6 +29,8 @@ async function fetchPlan() {
   await $fetch("/api/admin/fetchPlan");
   await refreshLastFetch();
 }
+
+const { data: reports } = useFetch("/api/admin/reports");
 </script>
 
 <template>
@@ -65,7 +67,13 @@ async function fetchPlan() {
       <template #header>
         <h2 class="font-bold text-lg">Reports</h2>
       </template>
-      <p class="text-sm text-center">Looks good! No reports to process.</p>
+      <template v-if="reports">
+        <Report v-for="planReport in reports.plan" :report="planReport" />
+        <Report v-for="subReport in reports.substitution" :report="subReport" />
+      </template>
+      <p v-else class="text-sm text-center">
+        Looks good! No reports to process.
+      </p>
     </UCard>
     <UCard :ui="{ body: 'flex justify-center' }">
       <template #header>
