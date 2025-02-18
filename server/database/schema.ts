@@ -130,3 +130,12 @@ export const substitutionReportRelations = relations(
     }),
   })
 );
+
+export const substitutionOverride = sqliteTable("SubstitutionOverride", {
+  date: calendarDate().notNull(),
+  substitutionId: text().notNull(),
+  data: text({ mode: "json" })
+    .$type<Partial<Omit<Substitution, "id">>>()
+    .notNull(),
+  createdAt: calendarDateTime().notNull(),
+});
