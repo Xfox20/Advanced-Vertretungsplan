@@ -38,13 +38,13 @@ updateTitle(selectedDate.value);
 
 const {
   status: fetchStatus,
-  data: plan,
+  data,
   refresh,
-} = await useAsyncData<SubstitutionPlan>(() =>
-  $fetch<DeadSubstitutionPlan>(
-    `/api/plan?date=${selectedDate.value.toString()}`
-  ).then(revivePlan)
+} = await useFetch<string>(
+  () => `/api/plan?date=${selectedDate.value.toString()}`
 );
+
+const plan = computed(() => data.value && revivePlan(JSON.parse(data.value)));
 
 provide("refreshPlan", refresh);
 provide("plan", plan);

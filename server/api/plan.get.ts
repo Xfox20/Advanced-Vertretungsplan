@@ -20,9 +20,9 @@ export default defineEventHandler(async (event) => {
   });
   if (!downloadInfo) return createError({ statusCode: 500 });
 
-  return {
+  return JSON.stringify({
     ...(({ downloadHash: _, ...r }) => r)(dbPlan),
     firstFetch: downloadInfo.firstFetch,
     lastFetch: downloadInfo.lastFetch,
-  } as SubstitutionPlan;
+  });
 });
