@@ -40,7 +40,10 @@ const { data: reports } = useFetch("/api/admin/reports");
       <template #header>
         <h2 class="font-bold text-lg">Fetch the plan</h2>
       </template>
-      <p v-if="minutesSinceLastFetch && minutesSinceLastFetch < 5" class="mb-2">
+      <p
+        v-if="minutesSinceLastFetch !== undefined && minutesSinceLastFetch < 5"
+        class="mb-2"
+      >
         The plan was last fetched
         <span v-if="lastFetch"
           >{{ minutesSinceLastFetch }} minute{{
