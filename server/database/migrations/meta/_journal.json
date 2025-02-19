@@ -29,6 +29,13 @@
       "when": 1739906896325,
       "tag": "0003_volatile_warstar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1739996507371,
+      "tag": "0004_conscious_marauders",
+      "breakpoints": true
     }
   ]
 }

@@ -70,9 +70,8 @@ const { data: reports } = useFetch("/api/admin/reports");
       <template #header>
         <h2 class="font-bold text-lg">Reports</h2>
       </template>
-      <template v-if="reports">
-        <Report v-for="planReport in reports.plan" :report="planReport" />
-        <Report v-for="subReport in reports.substitution" :report="subReport" />
+      <template v-if="reports.length">
+        <Report v-for="planReport in reports" :report="planReport" />
       </template>
       <p v-else class="text-sm text-center">
         Looks good! No reports to process.

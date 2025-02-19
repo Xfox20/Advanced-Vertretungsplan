@@ -54,7 +54,7 @@ const report = reactive<Partial<Schema>>({
 const toast = useToast();
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   Object.assign(event.data, { planId });
-  await $fetch("/api/report/plan", {
+  await $fetch("/api/report", {
     method: "POST",
     body: JSON.stringify(event.data),
   })

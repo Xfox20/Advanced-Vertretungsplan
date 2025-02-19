@@ -78,38 +78,19 @@ export const substitutionRelations = relations(substitution, ({ one }) => ({
   }),
 }));
 
-export const planReport = sqliteTable("PlanReport", {
-  planId: text()
-    .primaryKey()
-    .references(() => plan.id),
-  type: text({
-    enum: ["missing", "many-missing", "info", "other"],
-  }).notNull(),
-  comment: text(),
-  resolved: integer({ mode: "boolean" }).notNull().default(false),
-});
-
-export const planReportRelations = relations(planReport, ({ one }) => ({
-  plan: one(plan, {
-    fields: [planReport.planId],
-    references: [plan.id],
-  }),
-}));
-
-export const substitutionReport = sqliteTable(
-  "SubstitutionReport",
+export const report = sqliteTable(
+  "Report",
   {
-    planId: text()
-      .notNull()
-      .references(() => plan.id),
-    substitutionId: text().notNull(),
+    id: text().primaryKey(),
+    planId: text().notNull(),
+    substitutionId: text(),
     type: text({
-      enum: ["missing", "wrong", "scrambled"],
+      enum: ["missing", "many-missing", "info", "other", "wrong", "scrambled"],
     }).notNull(),
+    comment: text(),
     resolved: integer({ mode: "boolean" }).notNull().default(false),
   },
   (table) => [
-    primaryKey({ columns: [table.planId, table.substitutionId] }),
     foreignKey({
       columns: [table.planId, table.substitutionId],
       foreignColumns: [substitution.planId, substitution.id],
@@ -117,19 +98,16 @@ export const substitutionReport = sqliteTable(
   ]
 );
 
-export const substitutionReportRelations = relations(
-  substitutionReport,
-  ({ one }) => ({
-    plan: one(plan, {
-      fields: [substitutionReport.planId],
-      references: [plan.id],
-    }),
-    substitution: one(substitution, {
-      fields: [substitutionReport.substitutionId],
-      references: [substitution.id],
-    }),
-  })
-);
+export const reportRelations = relations(report, ({ one }) => ({
+  plan: one(plan, {
+    fields: [report.planId],
+    references: [plan.id],
+  }),
+  substitution: one(substitution, {
+    fields: [report.substitutionId],
+    references: [substitution.id],
+  }),
+}));
 
 export const substitutionOverride = sqliteTable("SubstitutionOverride", {
   date: calendarDate().notNull(),
