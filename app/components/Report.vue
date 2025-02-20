@@ -19,7 +19,11 @@ defineProps({
         }}
       </h1>
       <p v-if="report?.substitution" class="text-sm text-gray-500 mt-0.5">
-        {{ report.substitution.subject }}
+        {{
+          typeof report?.substitution.subject === "string"
+            ? report?.substitution.subject
+            : `${report?.substitution.subject.type}: ${report?.substitution.subject.name}`
+        }}
         ({{ report.substitution.classes.join(", ") }}) in
         {{ report.substitution.hours.map((h: string) => h + ".").join("/") }}
         hour
