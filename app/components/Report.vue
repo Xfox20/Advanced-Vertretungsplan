@@ -32,7 +32,7 @@ defineProps({
     </div>
     <div class="font-mono text-sm justify-self-end flex items-center gap-3">
       <span class="text-[var(--ui-error)]">{{ report?.type }}</span>
-      <UIcon name="i-lucide-chevron-right" />
+      <UIcon name="i-lucide-chevron-right" class="text-[var(--ui-text)]" />
     </div>
   </NuxtLink>
 </template>

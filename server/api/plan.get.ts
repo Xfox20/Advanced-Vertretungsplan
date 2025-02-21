@@ -20,16 +20,25 @@ export default defineEventHandler(async (event) => {
   });
   if (!downloadInfo) return createError({ statusCode: 500 });
 
-  const overrides = await useDrizzle().query.substitutionOverride.findMany({
+  const subOverrides = await useDrizzle().query.substitutionOverride.findMany({
+    where: (table, { eq }) => eq(table.date, calendarDate),
+    orderBy: (table, { asc }) => asc(table.createdAt),
+  });
+
+  subOverrides.forEach((override) => {
+    const substitution = dbPlan.substitutions.find(
+      (s) => s.id === override.substitutionId
+    );
+    if (substitution) mergeSubstitutionOverrides(substitution, override.data);
+  });
+
+  const overrides = await useDrizzle().query.planOverride.findMany({
     where: (table, { eq }) => eq(table.date, calendarDate),
     orderBy: (table, { asc }) => asc(table.createdAt),
   });
 
   overrides.forEach((override) => {
-    const substitution = dbPlan.substitutions.find(
-      (s) => s.id === override.substitutionId
-    );
-    if (substitution) mergeSubstitutionOverrides(substitution, override.data);
+    Object.assign(dbPlan, override.data);
   });
 
   return JSON.stringify({

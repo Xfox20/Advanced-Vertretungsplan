@@ -13,6 +13,11 @@ type OverrideFormValue = Partial<
   }
 >;
 
+async function finish() {
+  await $fetch(`/api/admin/report/${route.params.id}/markAsResolved`);
+  await navigateTo("/admin");
+}
+
 const overrideSubmission = reactive<OverrideFormValue>({ substitution: {} });
 
 async function submitOverride() {
@@ -23,19 +28,28 @@ async function submitOverride() {
   };
   console.log(report);
 
-  await Promise.all([
-    $fetch(`/api/admin/override`, {
-      method: "POST",
-      body: {
-        date: report.value?.plan.date,
-        substitutionId: report.value?.substitution?.id,
-        data,
-      },
-    }),
-    $fetch(`/api/admin/report/${route.params.id}/markAsResolved`),
-  ]);
+  await $fetch("/api/admin/override/", {
+    method: "POST",
+    body: {
+      date: report.value?.plan.date,
+      substitutionId: report.value?.substitution?.id,
+      data,
+    },
+  });
 
-  await navigateTo("/admin");
+  await finish();
+}
+
+async function updateNotes() {
+  await $fetch("/api/admin/override/plan", {
+    method: "POST",
+    body: {
+      date: report.value?.plan.date,
+      data: { notes: report.value?.plan.notes },
+    },
+  });
+
+  await finish();
 }
 </script>
 
@@ -52,8 +66,17 @@ async function submitOverride() {
       block
       label="Open the plan’s
       original PDF"
-      class="my-4"
+      class="mt-4 mb-2"
       @click="openPdf(parseDate(report?.plan.date as any))"
+    />
+    <UButton
+      icon="i-lucide-x"
+      variant="subtle"
+      color="neutral"
+      block
+      label="There is no problem"
+      class="mb-4"
+      @click="finish"
     />
     <h2 class="font-bold text-xl mt-3 mb-1.5">Details</h2>
     <ul>
@@ -92,8 +115,8 @@ async function submitOverride() {
         disable-context-menu
       />
     </template>
+    <h2 class="font-bold text-xl mt-3 mb-1.5">Provide an override</h2>
     <template v-if="report?.substitution">
-      <h2 class="font-bold text-xl mt-3 mb-1.5">Provide an override</h2>
       <SubstitutionCardEditable
         :substitution="report?.substitution"
         :state="overrideSubmission"
@@ -105,6 +128,31 @@ async function submitOverride() {
         loading-auto
         @click="submitOverride"
       />
+    </template>
+    <template v-else>
+      <div>
+        <h3 class="font-bold text-lg mb-2">Notes</h3>
+        <ul>
+          <li
+            v-for="(note, index) in report?.plan.notes"
+            :key="index"
+            class="mb-2"
+          >
+            <UInput
+              type="text"
+              v-model="report.plan.notes[index]"
+              class="w-full"
+            />
+          </li>
+        </ul>
+        <UButton
+          icon="i-lucide-save"
+          label="Save"
+          block
+          loading-auto
+          @click="updateNotes"
+        />
+      </div>
     </template>
   </UContainer>
 </template>

@@ -117,3 +117,9 @@ export const substitutionOverride = sqliteTable("SubstitutionOverride", {
     .notNull(),
   createdAt: calendarDateTime().notNull(),
 });
+
+export const planOverride = sqliteTable("PlanOverride", {
+  date: calendarDate().notNull(),
+  data: text({ mode: "json" }).$type<Partial<{ notes: string[] }>>().notNull(),
+  createdAt: calendarDateTime().notNull(),
+});
