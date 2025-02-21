@@ -7,11 +7,12 @@ defineProps({
 </script>
 
 <template>
-  <div
+  <NuxtLink
+    :to="`/admin/report/${report?.id}`"
     class="flex flex-row justify-between items-center gap-2 hover:bg-gray-100 cursor-pointer p-2 rounded-lg"
   >
     <div>
-      <h1 class="text-lg font-semibold">
+      <h1 class="text-lg font-semibold text-[var(--ui-text)]">
         {{
           parseDate(report?.plan.date.toString())
             .toDate("Europe/Berlin")
@@ -33,5 +34,5 @@ defineProps({
       <span class="text-[var(--ui-error)]">{{ report?.type }}</span>
       <UIcon name="i-lucide-chevron-right" />
     </div>
-  </div>
+  </NuxtLink>
 </template>

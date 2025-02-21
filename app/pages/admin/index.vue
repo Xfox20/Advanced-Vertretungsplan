@@ -34,7 +34,7 @@ const { data: reports } = useFetch("/api/admin/reports");
 </script>
 
 <template>
-  <UContainer class="mt-8">
+  <UContainer class="my-8">
     <h1 class="text-3xl font-extrabold text-center mb-6">Hey, admin!</h1>
     <UCard class="mb-8">
       <template #header>
@@ -70,7 +70,7 @@ const { data: reports } = useFetch("/api/admin/reports");
       <template #header>
         <h2 class="font-bold text-lg">Reports</h2>
       </template>
-      <template v-if="reports.length">
+      <template v-if="reports?.length">
         <Report v-for="planReport in reports" :report="planReport" />
       </template>
       <p v-else class="text-sm text-center">
