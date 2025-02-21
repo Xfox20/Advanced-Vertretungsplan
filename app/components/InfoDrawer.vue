@@ -117,20 +117,20 @@ const commitHash = useRuntimeConfig().public.commitHash;
       </UAccordion>
       <!-- footer -->
       <p class="text-xs text-center mt-2">
-        <a
+        <NuxtLink
           :href="`https://github.com/Xfox20/Advanced-Vertretungsplan/commit/${commitHash}`"
           target="_blank"
+          class="text-[var(--ui-primary)]"
         >
           <UIcon name="i-lucide-github" class="align-[-2px] size-3.5" />
           #{{ commitHash }}
-        </a>
+        </NuxtLink>
+        &middot;
+        <NuxtLink to="/admin">
+          <UIcon name="i-lucide-lock" class="align-[-2px] size-3.5" />
+          admin
+        </NuxtLink>
       </p>
     </template>
   </UDrawer>
 </template>
-
-<style lang="css">
-a:not(.neutral) {
-  color: var(--ui-primary);
-}
-</style>
