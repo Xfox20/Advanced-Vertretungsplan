@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   if (!process.env.ADMIN_PASSWORD_HASH) return createError({ statusCode: 500 });
 
-  if (await argon2.verify(body.password, process.env.ADMIN_PASSWORD_HASH)) {
+  if (await argon2.verify(process.env.ADMIN_PASSWORD_HASH, body.password)) {
     await setUserSession(event, {
       user: {},
     });
