@@ -1,15 +1,12 @@
-import got from "got";
+import fetch from "node-fetch";
 import FormData from "form-data";
-import { CookieJar } from "tough-cookie";
 import fs from "fs";
-import unzip from "unzip-stream";
+import { unzipSync } from "fflate";
 import tesseract from "node-tesseract-ocr";
 
 export async function convertToMarkdown(
   downloadHash: string
 ): Promise<boolean> {
-  const cookieJar = new CookieJar();
-
   const conversionOptions = {
     UseOcr: "true",
     Locale: "en",
@@ -17,52 +14,40 @@ export async function convertToMarkdown(
     PageRange: null,
   };
 
-  const buffer = await hubBlob()
-    .get(`plans/${downloadHash}/download.pdf`)
-    .then(async (b) => (b ? Buffer.from(await b.arrayBuffer()) : undefined));
+  const blob = await hubBlob().get(`plans/${downloadHash}/download.pdf`);
+  if (!blob) throw new Error("Failed to retrieve the blob");
+
+  const pdfBuffer = await blob.arrayBuffer().then(Buffer.from);
 
   const formData = new FormData();
   formData.append("ConversionOptions", JSON.stringify(conversionOptions));
-  formData.append("1", buffer, "download.pdf");
+  formData.append("1", new Blob([pdfBuffer]), "download.pdf");
 
-  const postResp = await got.post({
-    url: "https://api.products.aspose.app/words/conversion/api/convert?outputType=MD",
-    body: formData,
-    cookieJar,
-  });
+  const asposeResp = await fetch(
+    "https://api.products.aspose.app/words/conversion/api/convert?outputType=MD",
+    {
+      method: "POST",
+      body: formData,
+    }
+  ).then((r: any) => r.json() as any);
 
   const downloadUrl =
     "https://api.products.aspose.app/words/conversion/api/Download?id=" +
-    JSON.parse(postResp.body).id;
+    asposeResp.id;
 
-  const tempPath = `.data/temp/${downloadHash}`;
+  const response = await fetch(downloadUrl);
+  if (!response.body)
+    throw new Error(`Failed to download: ${response.statusText}`);
 
-  fs.mkdirSync(tempPath, { recursive: true });
+  const zipBuffer = await response.arrayBuffer().then(Buffer.from);
+  const files = unzipSync(zipBuffer);
 
-  const usedOcr = await new Promise<boolean>((resolve) => {
-    got
-      .stream({
-        url: downloadUrl,
-        cookieJar,
-        retry: {
-          limit: 5,
-          maxRetryAfter: 5000,
-        },
-      })
-      .pipe(unzip.Extract({ path: tempPath }))
-      .on("close", () => cleanUpMarkdown(tempPath).then(resolve));
-  });
+  const mdFile = files["download.md"];
+  if (!mdFile) throw new Error("Failed to find download.md in the zip");
 
-  const mdContentBuffer = fs.readFileSync(`${tempPath}/data.md`);
+  await hubBlob().put(`plans/${downloadHash}/data.md`, mdFile);
 
-  const arrayBuffer = new ArrayBuffer(mdContentBuffer.length);
-  new Uint8Array(arrayBuffer).set(mdContentBuffer);
-
-  await hubBlob().put(`plans/${downloadHash}/data.md`, arrayBuffer);
-
-  fs.rmSync(tempPath, { recursive: true });
-
-  return usedOcr;
+  return false;
 }
 
 async function cleanUpMarkdown(basePath: string) {
