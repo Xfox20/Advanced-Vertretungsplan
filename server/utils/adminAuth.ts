@@ -1,4 +1,4 @@
-import argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import { H3Event } from "h3";
 
 export async function authenticate(event: H3Event) {
@@ -27,7 +27,7 @@ async function authenticateWithHeader(authHeader: string | undefined) {
 
   if (!password) throw createError({ statusCode: 400 });
 
-  if (!argon2.verify(password, process.env.ADMIN_PASSWORD_HASH)) {
+  if (!bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH)) {
     throw createError({ statusCode: 401 });
   }
 

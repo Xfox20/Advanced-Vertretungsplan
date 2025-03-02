@@ -1,4 +1,4 @@
-import argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   if (!process.env.ADMIN_PASSWORD_HASH) return createError({ statusCode: 500 });
 
-  if (await argon2.verify(process.env.ADMIN_PASSWORD_HASH, body.password)) {
+  if (bcrypt.compareSync(body.password, process.env.ADMIN_PASSWORD_HASH)) {
     await setUserSession(event, {
       user: {},
     });

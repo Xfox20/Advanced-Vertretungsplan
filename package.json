@@ -14,7 +14,7 @@
     "@iconify-json/lucide": "^1.2.24",
     "@nuxt/ui": "next",
     "@nuxthub/core": "^0.8.17",
-    "argon2": "^0.41.1",
+    "bcryptjs": "^3.0.2",
     "drizzle-orm": "^0.39.2",
     "form-data": "^4.0.1",
     "got": "^14.4.5",
