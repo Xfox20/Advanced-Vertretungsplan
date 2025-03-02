@@ -8,8 +8,7 @@ import { BatchItem } from "drizzle-orm/batch";
 
 export async function parsePlan(
   downloadHash: string,
-  date?: CalendarDate | null,
-  usedOcr: boolean = false
+  date?: CalendarDate | null
 ) {
   const markdownBlob = await hubBlob().get(`plans/${downloadHash}/data.md`);
   if (!markdownBlob) throw new Error("File not found");
@@ -55,7 +54,6 @@ export async function parsePlan(
       ...parsedPlan,
       id: downloadHash,
       downloadHash,
-      usedOcr,
     });
 
   // Insert substitutions

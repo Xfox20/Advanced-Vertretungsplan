@@ -25,7 +25,7 @@ const openReportModal = () => {
       {{ selectedDate.toDate(tz).toLocaleDateString(locale) }}
     </h2>
     <!-- warning banner for inaccurate data -->
-    <p v-if="plan.usedOcr" class="text-[var(--ui-error)]">
+    <p v-if="plan.faulty" class="text-[var(--ui-error)]">
       <UIcon name="i-lucide-octagon-alert" class="relative top-[2px]" />
       Achtung: Die aktuellen Daten können sehr ungenau sein.
     </p>

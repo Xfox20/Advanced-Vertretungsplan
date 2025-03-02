@@ -89,13 +89,13 @@ async function updateNotes() {
       </li>
       <li>
         <b>
-          Used OCR:
+          Faulty Plan:
           <span
             :class="`text-[var(--ui-${
-              report?.plan.usedOcr ? 'error' : 'success'
+              report?.plan.faulty ? 'error' : 'success'
             })]`"
           >
-            {{ report?.plan.usedOcr ? "YES" : "NO" }}
+            {{ report?.plan.faulty ? "YES" : "NO" }}
           </span>
         </b>
       </li>

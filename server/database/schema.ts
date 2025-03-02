@@ -44,7 +44,7 @@ export const plan = sqliteTable("Plan", {
   date: calendarDate().notNull(),
   updatedAt: calendarDateTime().notNull(),
   notes: text({ mode: "json" }).$type<string[]>().notNull(),
-  usedOcr: integer({ mode: "boolean" }),
+  faulty: integer({ mode: "boolean" }),
 });
 
 export const planVersionRelations = relations(plan, ({ one, many }) => ({

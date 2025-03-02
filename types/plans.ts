@@ -23,7 +23,6 @@ export type SubstitutionPlan = {
   substitutions: Substitution[];
   firstFetch: CalendarDateTime;
   lastFetch: CalendarDateTime;
-  usedOcr: boolean | null;
 };
 
 export type DeadSubstitutionPlan = {
