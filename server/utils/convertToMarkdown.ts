@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import FormData from "form-data";
 import fs from "fs";
 import { unzipSync } from "fflate";
 import tesseract from "node-tesseract-ocr";
@@ -19,16 +18,13 @@ export async function convertToMarkdown(
 
   const pdfBuffer = await blob.arrayBuffer().then(Buffer.from);
 
-  const formData = new FormData();
+  const formData: any = new FormData();
   formData.append("ConversionOptions", JSON.stringify(conversionOptions));
   formData.append("1", new Blob([pdfBuffer]), "download.pdf");
 
   const asposeResp = await fetch(
     "https://api.products.aspose.app/words/conversion/api/convert?outputType=MD",
-    {
-      method: "POST",
-      body: formData,
-    }
+    { method: "POST", body: formData }
   ).then((r: any) => r.json() as any);
 
   const downloadUrl =
