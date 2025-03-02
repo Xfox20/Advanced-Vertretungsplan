@@ -3,7 +3,7 @@ import {
   parseDate,
   parseDateTime,
 } from "@internationalized/date";
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { BatchItem } from "drizzle-orm/batch";
 
 export async function parsePlan(

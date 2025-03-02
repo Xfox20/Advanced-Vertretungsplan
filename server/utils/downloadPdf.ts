@@ -2,7 +2,7 @@ import { now, parseDate, toCalendarDateTime } from "@internationalized/date";
 import { parse } from "node-html-parser";
 import got from "got";
 import { CookieJar } from "tough-cookie";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 export async function downloadPdf() {
   const cookieJar = new CookieJar();
