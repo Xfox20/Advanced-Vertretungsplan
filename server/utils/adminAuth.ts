@@ -4,7 +4,7 @@ import { H3Event } from "h3";
 export async function authenticate(event: H3Event) {
   const authHeader = getHeader(event, "Authorization");
 
-  if (!authenticateWithHeader(authHeader)) {
+  if (!(await authenticateWithHeader(authHeader))) {
     await requireUserSession(event);
   }
 }
