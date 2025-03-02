@@ -14,9 +14,9 @@
     "@iconify-json/lucide": "^1.2.24",
     "@nuxt/ui": "next",
     "@nuxthub/core": "^0.8.17",
-    "@types/node-fetch": "^2.6.12",
     "bcryptjs": "^3.0.2",
     "drizzle-orm": "^0.39.2",
+    "fetch-cookie": "^3.1.0",
     "fflate": "^0.8.2",
     "form-data": "^4.0.1",
     "got": "^14.4.5",
@@ -31,6 +31,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.6.12",
     "@types/unzip-stream": "^0.3.4",
     "drizzle-kit": "^0.30.4",
     "git-describe": "^4.1.1",
