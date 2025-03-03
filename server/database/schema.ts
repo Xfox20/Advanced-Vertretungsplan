@@ -1,6 +1,8 @@
 import {
   customType,
   primaryKey,
+  foreignKey,
+  uniqueIndex,
   sqliteTable,
   text,
   integer,
@@ -30,7 +32,7 @@ export const download = sqliteTable("Download", {
   hash: text().notNull().primaryKey(),
   firstFetch: calendarDateTime().notNull(),
   lastFetch: calendarDateTime().notNull(),
-})
+});
 
 export const downloadRelations = relations(download, ({ one }) => ({
   plan: one(plan),
@@ -42,7 +44,7 @@ export const plan = sqliteTable("Plan", {
   date: calendarDate().notNull(),
   updatedAt: calendarDateTime().notNull(),
   notes: text({ mode: "json" }).$type<string[]>().notNull(),
-  usedOcr: integer({ mode: "boolean" }),
+  faulty: integer({ mode: "boolean" }),
 });
 
 export const planVersionRelations = relations(plan, ({ one, many }) => ({
@@ -75,3 +77,49 @@ export const substitutionRelations = relations(substitution, ({ one }) => ({
     references: [plan.downloadHash],
   }),
 }));
+
+export const report = sqliteTable(
+  "Report",
+  {
+    id: text().primaryKey(),
+    planId: text().notNull(),
+    substitutionId: text(),
+    type: text({
+      enum: ["missing", "many-missing", "info", "other", "wrong", "scrambled"],
+    }).notNull(),
+    comment: text(),
+    resolved: integer({ mode: "boolean" }).notNull().default(false),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.planId, table.substitutionId],
+      foreignColumns: [substitution.planId, substitution.id],
+    }),
+  ]
+);
+
+export const reportRelations = relations(report, ({ one }) => ({
+  plan: one(plan, {
+    fields: [report.planId],
+    references: [plan.id],
+  }),
+  substitution: one(substitution, {
+    fields: [report.substitutionId],
+    references: [substitution.id],
+  }),
+}));
+
+export const substitutionOverride = sqliteTable("SubstitutionOverride", {
+  date: calendarDate().notNull(),
+  substitutionId: text().notNull(),
+  data: text({ mode: "json" })
+    .$type<Partial<Omit<Substitution, "id">>>()
+    .notNull(),
+  createdAt: calendarDateTime().notNull(),
+});
+
+export const planOverride = sqliteTable("PlanOverride", {
+  date: calendarDate().notNull(),
+  data: text({ mode: "json" }).$type<Partial<{ notes: string[] }>>().notNull(),
+  createdAt: calendarDateTime().notNull(),
+});

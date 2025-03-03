@@ -1,0 +1,1 @@
+ALTER TABLE `Plan` RENAME COLUMN "usedOcr" TO "faulty";

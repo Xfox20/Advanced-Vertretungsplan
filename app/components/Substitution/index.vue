@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const sub = inject("sub") as SubstitutionPlan["substitutions"][number];
+const sub = inject<Substitution>("sub");
 
 const hasRoomChange = computed(
   () =>

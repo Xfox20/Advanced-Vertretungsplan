@@ -1,9 +1,20 @@
 <script lang="ts" setup>
 import { CalendarDate } from "@internationalized/date";
+import { ReportModal } from "#components";
 
 const { tz, locale } = inject<LocaleInfo>("locale")!;
 const selectedDate = inject<Ref<CalendarDate>>("date")!;
 const { plan } = defineProps<{ plan: SubstitutionPlan }>();
+
+const reportModal = useModal();
+const openReportModal = () => {
+  reportModal.open(ReportModal, {
+    date: selectedDate?.value,
+    tz,
+    locale,
+    planId: plan.id,
+  });
+};
 </script>
 
 <template>
@@ -14,7 +25,7 @@ const { plan } = defineProps<{ plan: SubstitutionPlan }>();
       {{ selectedDate.toDate(tz).toLocaleDateString(locale) }}
     </h2>
     <!-- warning banner for inaccurate data -->
-    <p v-if="plan.usedOcr" class="text-[var(--ui-error)]">
+    <p v-if="plan.faulty" class="text-[var(--ui-error)]">
       <UIcon name="i-lucide-octagon-alert" class="relative top-[2px]" />
       Achtung: Die aktuellen Daten können sehr ungenau sein.
     </p>
@@ -49,6 +60,15 @@ const { plan } = defineProps<{ plan: SubstitutionPlan }>();
           })
         }}
       </div>
+      <!-- report button -->
+      <UButton
+        variant="link"
+        icon="i-lucide-circle-ellipsis"
+        @click="openReportModal"
+        class="text-center"
+      >
+        Problem melden
+      </UButton>
     </div>
   </main>
 </template>

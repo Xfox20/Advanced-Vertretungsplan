@@ -5,12 +5,14 @@ export async function fetchPlan() {
 
   const { hash: downloadHash, date, changed: pdfChanged } = fileDetails;
 
-  let usedOcr = false;
-
   // If necessary, convert the PDF to markdown and parse it
   if (pdfChanged) {
-    usedOcr = await convertToMarkdown(downloadHash);
-    await parsePlan(downloadHash, date, usedOcr);
+    try {
+      await convertToMarkdown(downloadHash);
+    } catch (e) {
+      console.warn(e);
+    }
+    await parsePlan(downloadHash, date);
   }
 }
 

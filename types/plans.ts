@@ -16,13 +16,13 @@ export type Substitution = {
 };
 
 export type SubstitutionPlan = {
+  id: string;
   date: CalendarDate;
   updatedAt: CalendarDateTime;
   notes: string[];
   substitutions: Substitution[];
   firstFetch: CalendarDateTime;
   lastFetch: CalendarDateTime;
-  usedOcr: boolean | null;
 };
 
 export type DeadSubstitutionPlan = {

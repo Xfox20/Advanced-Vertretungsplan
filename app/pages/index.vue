@@ -46,8 +46,8 @@ const {
 
 const plan = computed(() => data.value && revivePlan(JSON.parse(data.value)));
 
-// Make it available in the footer
 provide("refreshPlan", refresh);
+provide("plan", plan);
 
 const selectedIsWeekend = computed(() => isWeekend(selectedDate.value, locale));
 
