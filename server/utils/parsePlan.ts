@@ -29,7 +29,8 @@ export async function parsePlan(
     );
   }
 
-  const updatedAt = parseLocalizedDateTime(/Stand: (.*)/i.exec(markdown)![1]);
+  const updatedAtMatch = /Stand: (.*)/i.exec(markdown);
+  const updatedAt = updatedAtMatch && parseLocalizedDateTime(updatedAtMatch[1]);
 
   const notes =
     /Hinweise:\s*((?:.+?\s+)*?)\s*(?=Aufsichten|\|)/i

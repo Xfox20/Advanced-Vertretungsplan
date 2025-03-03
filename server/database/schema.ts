@@ -42,7 +42,7 @@ export const plan = sqliteTable("Plan", {
   id: text().primaryKey(),
   downloadHash: text().notNull(),
   date: calendarDate().notNull(),
-  updatedAt: calendarDateTime().notNull(),
+  updatedAt: calendarDateTime(),
   notes: text({ mode: "json" }).$type<string[]>().notNull(),
   faulty: integer({ mode: "boolean" }).default(false),
 });

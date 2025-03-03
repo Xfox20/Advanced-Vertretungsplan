@@ -50,6 +50,13 @@
       "when": 1740933750939,
       "tag": "0006_awesome_raza",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1741020271296,
+      "tag": "0007_even_rattler",
+      "breakpoints": true
     }
   ]
 }
