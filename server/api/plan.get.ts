@@ -9,16 +9,23 @@ export default defineEventHandler(async (event) => {
 
   const calendarDate = parseDate(date);
 
-  const dbPlan = await useDrizzle().query.plan.findFirst({
-    where: (table, { eq }) => eq(table.date, calendarDate),
-    with: { substitutions: { columns: { planId: false } } },
-  });
-  if (!dbPlan) return createError({ statusCode: 404 });
+  const [dbPlan] = await useDrizzle()
+    .select()
+    .from(tables.plan)
+    .where(() => eq(tables.plan.date, calendarDate))
+    .leftJoin(tables.download, () =>
+      eq(tables.download.hash, tables.plan.downloadHash)
+    )
+    .orderBy(desc(tables.download.lastFetch))
+    .limit(1);
 
-  const downloadInfo = await useDrizzle().query.download.findFirst({
-    where: (table, { eq }) => eq(table.hash, dbPlan.downloadHash),
+  if (!dbPlan || !dbPlan.Download) throw createError({ statusCode: 404 });
+
+  const { Plan: plan, Download: downloadInfo } = dbPlan;
+
+  const substitutions = await useDrizzle().query.substitution.findMany({
+    where: (table, { eq }) => eq(table.planId, plan.id),
   });
-  if (!downloadInfo) return createError({ statusCode: 500 });
 
   const subOverrides = await useDrizzle().query.substitutionOverride.findMany({
     where: (table, { eq }) => eq(table.date, calendarDate),
@@ -26,7 +33,7 @@ export default defineEventHandler(async (event) => {
   });
 
   subOverrides.forEach((override) => {
-    const substitution = dbPlan.substitutions.find(
+    const substitution = substitutions.find(
       (s) => s.id === override.substitutionId
     );
     if (substitution) mergeSubstitutionOverrides(substitution, override.data);
@@ -38,11 +45,12 @@ export default defineEventHandler(async (event) => {
   });
 
   overrides.forEach((override) => {
-    Object.assign(dbPlan, override.data);
+    Object.assign(plan, override.data);
   });
 
   return JSON.stringify({
-    ...(({ downloadHash: _, ...r }) => r)(dbPlan),
+    ...(({ downloadHash: _, ...r }) => r)(plan),
+    substitutions,
     firstFetch: downloadInfo.firstFetch,
     lastFetch: downloadInfo.lastFetch,
   });
