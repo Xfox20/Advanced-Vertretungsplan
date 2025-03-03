@@ -10,5 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Make API Request
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          PRODUCTION_DOMAIN: ${{ vars.PRODUCTION_DOMAIN }}
         run: |
-          curl -u :${{ secrets.ADMIN_PASSWORD }} https://${{ env.PRODUCTION_DOMAIN }}/api/admin/fetchPlan
+          curl -u :$ADMIN_PASSWORD https://$PRODUCTION_DOMAIN/api/admin/fetchPlan
