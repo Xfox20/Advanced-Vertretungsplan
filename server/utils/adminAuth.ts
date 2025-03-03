@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { H3Event } from "h3";
 
 export async function authenticate(event: H3Event) {
@@ -27,7 +26,7 @@ async function authenticateWithHeader(authHeader: string | undefined) {
 
   if (!password) throw createError({ statusCode: 400 });
 
-  if (!bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH)) {
+  if (!(await verifyPassword(process.env.ADMIN_PASSWORD_HASH, password))) {
     throw createError({ statusCode: 401 });
   }
 

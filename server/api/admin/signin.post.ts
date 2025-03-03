@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 export default defineEventHandler(async (event) => {
@@ -11,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   if (!process.env.ADMIN_PASSWORD_HASH) return createError({ statusCode: 500 });
 
-  if (bcrypt.compareSync(body.password, process.env.ADMIN_PASSWORD_HASH)) {
+  if (await verifyPassword(process.env.ADMIN_PASSWORD_HASH, body.password)) {
     await setUserSession(event, {
       user: {},
     });
