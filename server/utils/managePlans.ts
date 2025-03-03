@@ -7,7 +7,11 @@ export async function fetchPlan() {
 
   // If necessary, convert the PDF to markdown and parse it
   if (pdfChanged) {
-    await convertToMarkdown(downloadHash);
+    try {
+      await convertToMarkdown(downloadHash);
+    } catch (e) {
+      console.warn(e);
+    }
     await parsePlan(downloadHash, date);
   }
 }

@@ -1,9 +1,7 @@
 import fetch from "node-fetch";
 import { unzipSync } from "fflate";
 
-export async function convertToMarkdown(
-  downloadHash: string
-): Promise<boolean> {
+export async function convertToMarkdown(downloadHash: string) {
   const conversionOptions = {
     UseOcr: "true",
     Locale: "en",
@@ -38,6 +36,10 @@ export async function convertToMarkdown(
 
   const mdFile = files["download.md"];
   if (!mdFile) throw new Error("Failed to find download.md in the zip");
+
+  if (/![.*](.*)/.test(Buffer.from(mdFile).toString())) {
+    throw new Error("Image detected in the markdown file");
+  }
 
   await hubBlob().put(`plans/${downloadHash}/data.md`, mdFile);
 }
