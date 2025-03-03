@@ -1,0 +1,14 @@
+name: Fetch Plan
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch-plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make API Request
+        run: |
+          curl -u :${{ secrets.ADMIN_PASSWORD }} https://${{ env.PRODUCTION_DOMAIN }}/api/admin/fetchPlan
