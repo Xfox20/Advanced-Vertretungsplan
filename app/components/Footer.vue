@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { CalendarDate } from "@internationalized/date";
 
-const { available } = defineProps<{
-  available: boolean;
-}>();
-
 const selectedDate = defineModel<CalendarDate>();
 const { tz, locale } = inject<LocaleInfo>("locale")!;
+const pdfAvailable = inject<boolean>("pdfAvailable");
 
 const refresh = inject<() => void>("refreshPlan")!;
 </script>
@@ -53,7 +50,7 @@ const refresh = inject<() => void>("refreshPlan")!;
         icon="i-lucide-file-text"
         variant="subtle"
         size="lg"
-        :disabled="!available"
+        :disabled="!pdfAvailable"
         @click="openPdf(selectedDate)"
       />
       <InfoDrawer><UButton icon="i-lucide-info" variant="ghost" /></InfoDrawer>

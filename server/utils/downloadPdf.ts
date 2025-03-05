@@ -194,6 +194,20 @@ async function downloadFile(
 
   const response = await fetch(url);
 
+  const filename =
+    decodeURIComponent(
+      response.headers
+        .get("content-disposition")
+        ?.match(/filename="(.+)"/)?.[1] ?? ""
+    ) || undefined;
+
+  const dateString = filename
+    ?.match(/\d{2}\.\d{2}\.\d{4}/)?.[0]
+    .split(".")
+    .reverse()
+    .join("-");
+  const date = dateString ? parseDate(dateString) : null;
+
   const arrayBuffer = await response.arrayBuffer();
   hashGenerator.update(Buffer.from(arrayBuffer));
 
@@ -205,6 +219,7 @@ async function downloadFile(
       hash,
       firstFetch: fetchedAt,
       lastFetch: fetchedAt,
+      date,
     })
     .onConflictDoUpdate({
       target: tables.download.hash,

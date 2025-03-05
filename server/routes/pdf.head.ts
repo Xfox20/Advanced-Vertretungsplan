@@ -9,14 +9,12 @@ export default defineEventHandler(async (event) => {
 
   const calendarDate = parseDate(date);
 
-  const downloadHash = await useDrizzle()
+  return (await useDrizzle()
     .select()
     .from(tables.download)
     .where(eq(tables.download.date, calendarDate))
     .orderBy(desc(tables.download.lastFetch))
-    .then((ps) => ps[0]?.hash);
-
-  if (!downloadHash) return createError({ statusCode: 404 });
-
-  return hubBlob().serve(event, `plans/${downloadHash}/download.pdf`);
+    .then((ps) => !!ps[0]))
+    ? undefined
+    : createError({ statusCode: 404 });
 });

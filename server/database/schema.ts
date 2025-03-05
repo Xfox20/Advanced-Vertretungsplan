@@ -32,6 +32,7 @@ export const download = sqliteTable("Download", {
   hash: text().notNull().primaryKey(),
   firstFetch: calendarDateTime().notNull(),
   lastFetch: calendarDateTime().notNull(),
+  date: calendarDate(),
 });
 
 export const downloadRelations = relations(download, ({ one }) => ({

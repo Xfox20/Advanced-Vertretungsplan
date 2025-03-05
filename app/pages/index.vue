@@ -46,8 +46,20 @@ const {
 
 const plan = computed(() => data.value && revivePlan(JSON.parse(data.value)));
 
+const { data: pdfAvailable } = await useAsyncData<boolean>(
+  () =>
+    $fetch("/pdf?date=" + selectedDate.value!.toString(), {
+      method: "HEAD",
+    }).then(
+      () => true,
+      () => false
+    ),
+  { watch: [selectedDate] }
+);
+
 provide("refreshPlan", refresh);
 provide("plan", plan);
+provide("pdfAvailable", pdfAvailable);
 
 const selectedIsWeekend = computed(() => isWeekend(selectedDate.value, locale));
 
@@ -82,6 +94,14 @@ watch(selectedDate, () => {
         <p v-else-if="selectedDate.compare(todayDate) > 0" class="text-center">
           Dieses Datum liegt zu weit in der Zukunft.
         </p>
+        <template v-else-if="pdfAvailable">
+          <p class="mb-2">Es gibt aber eine PDF-Version des Plans.</p>
+          <UButton
+            icon="i-lucide-file-text"
+            label="Öffnen"
+            @click="openPdf(selectedDate)"
+          />
+        </template>
         <p v-else class="text-center">
           Für diesen Tag wurde kein Vertretungsplan gespeichert… Vielleicht sind
           hier auch Ferien.
