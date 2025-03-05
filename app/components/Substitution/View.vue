@@ -33,7 +33,7 @@ const openReportModal = () => {
     <div class="text-gray-600 dark:text-gray-400 font-semibold mb-4">
       Stand:
       {{
-        plan.updatedAt.toDate(tz).toLocaleString(locale, {
+        plan.updatedAt?.toDate(tz).toLocaleString(locale, {
           dateStyle: "short",
           timeStyle: "short",
         })

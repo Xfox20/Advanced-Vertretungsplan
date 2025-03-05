@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
       tables.download,
       eq(tables.plan.downloadHash, tables.download.hash)
     )
-    .orderBy(desc(tables.plan.updatedAt))
+    .orderBy(desc(tables.download.lastFetch))
     .then((ps) => ps[0].Plan.downloadHash);
 
   if (!downloadHash) return createError({ statusCode: 404 });
