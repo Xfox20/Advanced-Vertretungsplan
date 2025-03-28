@@ -74,11 +74,8 @@ async function itslearningLogin(
   if (!viewStateRedirectUrl)
     throw new Error("ViewState redirect URL is missing");
 
-  const redirectResp = await fetch(viewStateRedirectUrl, {
-    redirect: "manual",
-  });
+  const { url: authStateUrl } = await fetch(viewStateRedirectUrl);
 
-  const authStateUrl = redirectResp.headers.get("location");
   const authState =
     authStateUrl && new URL(authStateUrl).searchParams.get("AuthState");
 
