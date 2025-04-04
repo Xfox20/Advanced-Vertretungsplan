@@ -14,17 +14,17 @@ const todayDate = today(tz);
 const selectedDate = shallowRef(todayDate);
 provide("date", selectedDate);
 
+// From 3 PM, show the next day's plan
+if (new Date().getHours() >= 15) {
+  selectedDate.value = selectedDate.value.add({ days: 1 });
+}
+
 // If the current date is a weekend, set it to the next Monday
 if (isWeekend(selectedDate.value, locale)) {
   selectedDate.value = startOfWeek(
     selectedDate.value.add({ weeks: 1 }),
     locale
   );
-}
-
-// From 3 PM, show the next day's plan
-if (new Date().getHours() >= 15) {
-  selectedDate.value = selectedDate.value.add({ days: 1 });
 }
 
 const updateTitle = (date: CalendarDate) => {
