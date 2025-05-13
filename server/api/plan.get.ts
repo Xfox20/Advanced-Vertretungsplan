@@ -11,15 +11,15 @@ export default defineEventHandler(async (event) => {
 
   const [dbPlan] = await useDrizzle()
     .select()
-    .from(tables.plan)
-    .where(() => eq(tables.plan.date, calendarDate))
-    .leftJoin(tables.download, () =>
-      eq(tables.download.hash, tables.plan.downloadHash)
+    .from(tables.download)
+    .where(() => eq(tables.download.date, calendarDate))
+    .leftJoin(tables.plan, () =>
+      eq(tables.plan.downloadHash, tables.download.hash)
     )
     .orderBy(desc(tables.download.lastFetch))
     .limit(1);
 
-  if (!dbPlan || !dbPlan.Download) throw createError({ statusCode: 404 });
+  if (!dbPlan || !dbPlan.Plan) throw createError({ statusCode: 404 });
 
   const { Plan: plan, Download: downloadInfo } = dbPlan;
 

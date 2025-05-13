@@ -9,10 +9,10 @@ export async function fetchPlan() {
   if (pdfChanged) {
     try {
       await convertToMarkdown(downloadHash);
+      await parsePlan(downloadHash, date);
     } catch (e) {
       console.warn(e);
     }
-    await parsePlan(downloadHash, date);
   }
 }
 

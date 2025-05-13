@@ -37,8 +37,8 @@ export async function convertToMarkdown(downloadHash: string) {
   const mdFile = files["download.md"];
   if (!mdFile) throw new Error("Failed to find download.md in the zip");
 
-  if (/![.*](.*)/.test(Buffer.from(mdFile).toString())) {
-    throw new Error("Image detected in the markdown file");
+  if (/\|.*!\[.*\]\(.*\).*\|/.test(Buffer.from(mdFile).toString())) {
+    throw new Error("Image detected in the markdown table");
   }
 
   await hubBlob().put(`plans/${downloadHash}/data.md`, mdFile);
