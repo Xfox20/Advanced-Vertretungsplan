@@ -80,7 +80,11 @@ function parsePdfRow(row: string[]) {
     throw new Error(`Invalid row: ${row.join(" | ")}`);
   if (row.length === 10) {
     if (!row[5]) {
-      row.splice(4, 1);
+      if (!row[4]) {
+        row.splice(4, 1);
+      } else {
+        row.splice(5, 1);
+      }
     } else {
       row.splice(-1, 1);
     }
