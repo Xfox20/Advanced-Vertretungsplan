@@ -19,10 +19,21 @@ const openReportModal = () => {
 
 <template>
   <main>
+    <!-- subtitle -->
+    <p class="text-sm font-semibold text-gray-500 text-center">
+      Gymnasium Reutershagen
+    </p>
     <!-- heading -->
-    <h2 class="text-2xl text-center font-bold mb-3">
-      Vertretungsplan
-      {{ selectedDate.toDate(tz).toLocaleDateString(locale) }}
+    <h2 class="text-xl text-center font-bold mb-4">
+      Vertretungsplan für
+      {{
+        selectedDate.toDate(tz).toLocaleDateString(locale, { weekday: "long" })
+      }}, den
+      {{
+        selectedDate
+          .toDate(tz)
+          .toLocaleDateString(locale, { dateStyle: "medium" })
+      }}
     </h2>
     <!-- warning banner for inaccurate data -->
     <p v-if="plan.faulty" class="text-[var(--ui-error)]">
