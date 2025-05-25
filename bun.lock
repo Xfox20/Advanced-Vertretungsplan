@@ -5,7 +5,7 @@
       "name": "nuxt-app",
       "dependencies": {
         "@iconify-json/lucide": "^1.2.24",
-        "@nuxt/ui": "next",
+        "@nuxt/ui": "^3.0.0-alpha.12",
         "@nuxthub/core": "^0.8.17",
         "drizzle-orm": "^0.39.2",
         "fetch-cookie": "^3.1.0",
@@ -28,6 +28,7 @@
     },
   },
   "overrides": {
+    "@szmarczak/http-timer": "4.0.6",
     "unenv": "1.10.0",
   },
   "packages": {
