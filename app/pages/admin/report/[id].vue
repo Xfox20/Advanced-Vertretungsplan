@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { parseDate } from "@internationalized/date";
-
 const route = useRoute();
 
 const { data: report } = useFetch(`/api/admin/report/${route.params.id}`);
@@ -26,7 +24,6 @@ async function submitOverride() {
     classes: overrideSubmission.classes?.split(",").map((c) => c.trim()),
     hours: overrideSubmission.hours?.split(",").map((h) => parseInt(h.trim())),
   };
-  console.log(report);
 
   await $fetch("/api/admin/override/", {
     method: "POST",
@@ -54,7 +51,7 @@ async function updateNotes() {
 </script>
 
 <template>
-  <UContainer class="my-8">
+  <UContainer class="my-8" v-if="report">
     <h1 class="font-bold text-2xl text-center mb-5">Resolve a problem</h1>
     <p>
       Someone reported a problem with this plan. Review the problem and resolve
@@ -67,7 +64,8 @@ async function updateNotes() {
       label="Open the plan’s
       original PDF"
       class="mt-4 mb-2"
-      @click="openPdf(parseDate(report?.plan.date as any))"
+      :href="'/pdf?date=' + report.plan.date.toString()"
+      target="_blank"
     />
     <UButton
       icon="i-lucide-x"

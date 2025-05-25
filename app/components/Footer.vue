@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { CalendarDate } from "@internationalized/date";
-
-const selectedDate = defineModel<CalendarDate>();
-const { tz, locale } = inject<LocaleInfo>("locale")!;
+const selectedDate = useSelectedDate();
+const { tz, locale } = useUserLocale();
 const pdfAvailable = inject<boolean>("pdfAvailable");
 
 const refresh = inject<() => void>("refreshPlan")!;
@@ -51,7 +49,8 @@ const refresh = inject<() => void>("refreshPlan")!;
         variant="subtle"
         size="lg"
         :disabled="!pdfAvailable"
-        @click="openPdf(selectedDate)"
+        :href="'/pdf?date=' + selectedDate?.toString()"
+        target="_blank"
       />
       <InfoDrawer><UButton icon="i-lucide-info" variant="ghost" /></InfoDrawer>
     </div>

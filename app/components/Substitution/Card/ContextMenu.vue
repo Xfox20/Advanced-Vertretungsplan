@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 import { SubstitutionReportModal as ReportModal } from "#components";
-import { CalendarDate } from "@internationalized/date";
 
-const selectedDate = inject<Ref<CalendarDate>>("date");
+const selectedDate = useSelectedDate();
 const plan = inject<Ref<SubstitutionPlan>>("plan")!;
 const sub = inject<Substitution>("sub");
 
@@ -11,8 +10,8 @@ const reportModal = useModal();
 const openReportModal = () => {
   reportModal.open(ReportModal, {
     substitution: sub,
-    date: selectedDate?.value,
-    planId: plan.value.id,
+    date: selectedDate.value,
+    planId: plan.value?.id,
   });
 };
 

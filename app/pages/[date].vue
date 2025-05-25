@@ -1,26 +1,11 @@
 <script setup lang="ts">
-import { today, isWeekend, parseDate } from "@internationalized/date";
+import { today, isWeekend } from "@internationalized/date";
 
-const route = useRoute();
 const router = useRouter();
 
-const locale = "de-DE";
-const tz = "Europe/Berlin";
-provide("locale", { locale, tz } as LocaleInfo);
+const { tz, locale } = useUserLocale();
 
-const todayDate = today(tz);
-const selectedDate = shallowRef(parseDate(route.params.date as string));
-provide("date", selectedDate);
-
-const updateTitle = () => {
-  useHead({
-    title: `Vertretungsplan vom ${selectedDate.value
-      .toDate(tz)
-      .toLocaleDateString(locale)}`,
-  });
-  router.replace(`/${selectedDate.value.toString()}`);
-};
-updateTitle();
+const selectedDate = useSelectedDate();
 
 const {
   status: fetchStatus,
@@ -32,14 +17,17 @@ const {
 
 const plan = computed(() => data.value && revivePlan(JSON.parse(data.value)));
 
-const { data: pdfAvailable } = await useAsyncData<boolean>(
-  () =>
-    $fetch("/pdf?date=" + selectedDate.value!.toString(), {
-      method: "HEAD",
-    }).then(
-      () => true,
-      () => false
-    ),
+const { data: pdfAvailable } = await useAsyncData(
+  async () => {
+    try {
+      await $fetch("/pdf?date=" + selectedDate.value.toString(), {
+        method: "HEAD",
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
   { watch: [selectedDate] }
 );
 
@@ -47,11 +35,25 @@ provide("refreshPlan", refresh);
 provide("plan", plan);
 provide("pdfAvailable", pdfAvailable);
 
-const selectedIsWeekend = computed(() => isWeekend(selectedDate.value, locale));
+useHead({
+  title: computed(
+    () =>
+      `Vertretungsplan vom ${selectedDate.value
+        .toDate(tz)
+        .toLocaleDateString(locale)}`
+  ),
+});
+
+const selectedDateIsWeekend = computed(() =>
+  isWeekend(selectedDate.value, locale)
+);
+const selectedDateTooFarInFuture = computed(
+  () => selectedDate.value.compare(today(tz)) > 0
+);
 
 watch(selectedDate, () => {
-  updateTitle();
-  if (!selectedIsWeekend.value) refresh();
+  router.replace(`/${selectedDate.value.toString()}`);
+  if (!selectedDateIsWeekend.value) refresh();
 });
 </script>
 
@@ -67,17 +69,20 @@ watch(selectedDate, () => {
         <h2 class="text-xl font-semibold mt-2">Moment…</h2>
       </main>
       <!-- there is a plan to show -->
-      <SubstitutionView v-else-if="plan && !selectedIsWeekend" :plan="plan" />
+      <SubstitutionView
+        v-else-if="plan && !selectedDateIsWeekend"
+        :plan="plan"
+      />
       <!-- there is no plan on this date -->
       <main v-else class="flex flex-col items-center justify-center min-h-full">
-        <h2 v-if="selectedIsWeekend" class="text-xl font-semibold">
+        <h2 v-if="selectedDateIsWeekend" class="text-xl font-semibold">
           Wochenende!
         </h2>
         <h2 v-else class="text-xl font-semibold">Kein Plan</h2>
-        <p v-if="selectedIsWeekend" class="text-center">
+        <p v-if="selectedDateIsWeekend" class="text-center">
           Für diesen Tag gibt es keinen Vertretungsplan.
         </p>
-        <p v-else-if="selectedDate.compare(todayDate) > 0" class="text-center">
+        <p v-else-if="selectedDateTooFarInFuture" class="text-center">
           Dieses Datum liegt zu weit in der Zukunft.
         </p>
         <template v-else-if="pdfAvailable">
@@ -85,7 +90,8 @@ watch(selectedDate, () => {
           <UButton
             icon="i-lucide-file-text"
             label="Öffnen"
-            @click="openPdf(selectedDate)"
+            :href="'/pdf?date=' + selectedDate.toString()"
+            target="_blank"
           />
         </template>
         <p v-else class="text-center">
@@ -94,6 +100,6 @@ watch(selectedDate, () => {
         </p>
       </main>
     </UContainer>
-    <Footer :available="!!plan && !selectedIsWeekend" v-model="selectedDate" />
+    <Footer :available="!!plan && !selectedDateIsWeekend" />
   </div>
 </template>

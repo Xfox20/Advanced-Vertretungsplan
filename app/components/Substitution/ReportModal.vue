@@ -65,7 +65,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <p class="mb-4">
         Bitte melde nur ein Problem, wenn diese Informationen nicht dem
         <NuxtLink
-          @click="openPdf(date)"
+          :href="'/pdf?date=' + date.toString()"
+          target="_blank"
           class="text-[var(--ui-primary)] cursor-pointer"
         >
           originalen Vertretungsplan

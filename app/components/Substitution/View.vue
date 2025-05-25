@@ -2,8 +2,8 @@
 import { CalendarDate } from "@internationalized/date";
 import { ReportModal } from "#components";
 
-const { tz, locale } = inject<LocaleInfo>("locale")!;
-const selectedDate = inject<Ref<CalendarDate>>("date")!;
+const { tz, locale } = useUserLocale();
+const selectedDate = useSelectedDate();
 const { plan } = defineProps<{ plan: SubstitutionPlan }>();
 
 const reportModal = useModal();
