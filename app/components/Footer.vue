@@ -19,12 +19,14 @@ const refresh = inject<() => void>("refreshPlan")!;
         @click="selectedDate = selectedDate?.subtract({ days: 1 })"
       />
       <div class="text-lg font-mono text-center">
-        {{
-          selectedDate
-            ?.toDate(tz)
-            .toLocaleDateString(locale, { weekday: "short" })
-        }},
-        {{ selectedDate?.toDate(tz).toLocaleDateString(locale) }}
+        <NuxtTime
+          :datetime="selectedDate.toDate(tz)"
+          :locale
+          weekday="short"
+          day="numeric"
+          month="numeric"
+          year="numeric"
+        />
       </div>
       <UButton
         icon="i-lucide-chevron-right"

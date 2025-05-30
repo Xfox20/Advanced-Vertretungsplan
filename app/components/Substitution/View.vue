@@ -26,14 +26,13 @@ const openReportModal = () => {
     <!-- heading -->
     <h2 class="text-xl text-center font-bold mb-4">
       Vertretungsplan für
-      {{
-        selectedDate.toDate(tz).toLocaleDateString(locale, { weekday: "long" })
-      }}, den
-      {{
-        selectedDate
-          .toDate(tz)
-          .toLocaleDateString(locale, { dateStyle: "medium" })
-      }}
+      <NuxtTime :datetime="selectedDate.toDate(tz)" :locale weekday="long" />,
+      den
+      <NuxtTime
+        :datetime="selectedDate.toDate(tz)"
+        :locale
+        date-style="medium"
+      />
     </h2>
     <!-- warning banner for inaccurate data -->
     <p v-if="plan.faulty" class="text-[var(--ui-error)]">
@@ -43,12 +42,12 @@ const openReportModal = () => {
     <!-- last update -->
     <div class="text-gray-600 dark:text-gray-400 font-semibold mb-4">
       Stand:
-      {{
-        plan.updatedAt?.toDate(tz).toLocaleString(locale, {
-          dateStyle: "short",
-          timeStyle: "short",
-        })
-      }}
+      <NuxtTime
+        :datetime="plan.updatedAt?.toDate(tz)"
+        :locale
+        date-style="short"
+        time-style="short"
+      />
     </div>
     <!-- global notes -->
     <p v-for="note in plan?.notes" class="text-gray-500 mb-1.5">
