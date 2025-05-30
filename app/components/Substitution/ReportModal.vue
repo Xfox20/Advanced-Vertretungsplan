@@ -9,7 +9,7 @@ const { substitution, date, planId } = defineProps<{
   planId: string;
 }>();
 
-const modal = useModal();
+const emit = defineEmits();
 
 const reportOptions = ref([
   {
@@ -51,7 +51,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     .catch(() =>
       toast.add({ title: "Fehler beim Melden des Problems", color: "error" })
     )
-    .finally(modal.close);
+    .finally(() => emit("close"));
 }
 </script>
 
@@ -79,7 +79,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <URadioGroup :items="reportOptions" v-model="report.type" />
         <div class="flex gap-2 mt-5">
           <UButton color="primary" type="submit">Absenden</UButton>
-          <UButton color="neutral" variant="outline" @click="modal.close"
+          <UButton color="neutral" variant="outline" @click="emit('close')"
             >Abbrechen</UButton
           >
         </div>

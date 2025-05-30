@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { CalendarDate } from "@internationalized/date";
 import { ReportModal } from "#components";
 
 const { tz, locale } = useUserLocale();
 const selectedDate = useSelectedDate();
 const { plan } = defineProps<{ plan: SubstitutionPlan }>();
 
-const reportModal = useModal();
+const overlay = useOverlay();
+
 const openReportModal = () => {
-  reportModal.open(ReportModal, {
+  overlay.create(ReportModal).open({
     date: selectedDate?.value,
     tz,
     locale,

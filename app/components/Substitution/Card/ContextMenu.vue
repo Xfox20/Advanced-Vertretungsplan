@@ -6,9 +6,10 @@ const selectedDate = useSelectedDate();
 const plan = inject<Ref<SubstitutionPlan>>("plan")!;
 const sub = inject<Substitution>("sub");
 
-const reportModal = useModal();
+const overlay = useOverlay();
+
 const openReportModal = () => {
-  reportModal.open(ReportModal, {
+  overlay.create(ReportModal).open({
     substitution: sub,
     date: selectedDate.value,
     planId: plan.value?.id,
