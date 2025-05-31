@@ -64,6 +64,13 @@
       "when": 1741168664031,
       "tag": "0008_red_glorian",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1748666039317,
+      "tag": "0009_tan_chronomancer",
+      "breakpoints": true
     }
   ]
 }
