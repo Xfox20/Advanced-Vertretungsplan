@@ -35,7 +35,10 @@ const relevantSubstitutions = computed(() => {
   );
 });
 
-provide("filteringEnabled", filteringEnabled);
+provide(
+  "filteringActive",
+  computed(() => filteringEnabled.value && !!rememberedCourses.value.length)
+);
 </script>
 
 <template>

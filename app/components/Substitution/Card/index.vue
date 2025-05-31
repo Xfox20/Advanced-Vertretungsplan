@@ -5,7 +5,7 @@ const { substitution: sub, disableContextMenu } = defineProps<{
 }>();
 provide("sub", sub);
 
-const filteringEnabled = inject("filteringEnabled", ref(true));
+const filteringActive = inject("filteringActive", ref(true));
 </script>
 
 <template>
@@ -24,7 +24,7 @@ const filteringEnabled = inject("filteringEnabled", ref(true));
             ? sub.subject
             : `${sub.subject.type}: ${sub.subject.name}`
         }}</span>
-        <span v-if="!filteringEnabled"> ({{ sub.classes.join(", ") }})</span>
+        <span v-if="!filteringActive"> ({{ sub.classes.join(", ") }})</span>
       </div>
       <div class="flex items-center gap-1 font-light">
         {{
