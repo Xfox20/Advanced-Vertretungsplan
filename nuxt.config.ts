@@ -1,7 +1,7 @@
 import { gitDescribeSync } from "git-describe";
 
 export default defineNuxtConfig({
-  modules: ["@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils"],
+  modules: ["@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils", "@vueuse/nuxt"],
   compatibilityDate: "2025-02-05",
   future: { compatibilityVersion: 4 },
   devtools: { enabled: true },

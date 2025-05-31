@@ -1,4 +1,8 @@
 <script lang="ts" setup>
+import { SettingsModal } from "#components";
+
+const settingsModal = useOverlay().create(SettingsModal);
+
 const infoContent = ref([
   {
     label: "Hintergrund",
@@ -36,6 +40,15 @@ const commitHash = useRuntimeConfig().public.commitHash;
         Dies ist ein kleines inoffizielles Tool, das ich gemacht habe, mit dem
         man sich den Vertretungsplan besser anschauen kann.
       </p>
+      <UButton
+        variant="soft"
+        block
+        icon="i-lucide-settings"
+        class="mb-3"
+        @click="settingsModal.open()"
+      >
+        Zur Konfiguration
+      </UButton>
       <UAccordion :items="infoContent">
         <template #background>
           <p class="text-sm mb-2.5">
