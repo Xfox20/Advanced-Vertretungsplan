@@ -65,7 +65,7 @@ watch(selectedDate, () => {
         v-if="fetchStatus === 'pending'"
         class="flex flex-col items-center justify-center min-h-full"
       >
-        <UIcon name="i-lucide-loader" class="size-6 animate-spin" />
+        <UIcon name="i-lucide-loader-circle" class="size-6 animate-spin" />
         <h2 class="text-xl font-semibold mt-2">Moment…</h2>
       </main>
       <!-- there is a plan to show -->
