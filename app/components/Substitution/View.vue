@@ -15,6 +15,30 @@ const openReportModal = () => {
     planId: plan.id,
   });
 };
+
+const filteringEnabled = ref(true);
+const isMounted = ref(false);
+const rememberedCourses = computed(() =>
+  isMounted.value
+    ? useLocalStorage<string[]>("rememberedCourses", []).value
+    : []
+);
+
+onMounted(() => (isMounted.value = true));
+
+const relevantSubstitutions = computed(() => {
+  if (!filteringEnabled.value || !rememberedCourses.value.length) {
+    return plan.substitutions;
+  }
+  return plan.substitutions.filter((s) =>
+    s.classes.some((c) => rememberedCourses.value.includes(c))
+  );
+});
+
+provide(
+  "filteringActive",
+  computed(() => filteringEnabled.value && !!rememberedCourses.value.length)
+);
 </script>
 
 <template>
@@ -54,12 +78,44 @@ const openReportModal = () => {
       <UIcon name="i-lucide-info" class="relative top-[2px]" />
       {{ note }}
     </p>
-    <USeparator class="mt-3 mb-6" />
+    <USeparator class="mt-3 mb-5" />
     <!-- list of substitutions -->
-    <SubstitutionCard v-for="sub in plan.substitutions" :substitution="sub" />
-    <div class="flex flex-col items-center mt-5 gap-1.5">
+    <template v-if="isMounted">
+      <div
+        v-if="rememberedCourses.length"
+        class="flex items-center justify-between px-2 my-5"
+      >
+        <span class="flex items-center gap-2.5">
+          <UIcon name="i-lucide-filter" size="18" />
+          <span class="text-sm font-semibold">
+            <div>
+              Filterung nach Klasse{{ rememberedCourses.length > 2 ? "n" : "" }}
+            </div>
+            <div class="text-xs/3 text-gray-500">
+              {{ rememberedCourses.sort().join(", ") }}
+            </div>
+          </span>
+        </span>
+        <USwitch v-model="filteringEnabled" size="sm" />
+      </div>
+      <SubstitutionCard
+        v-for="sub in relevantSubstitutions"
+        :substitution="sub"
+      />
+    </template>
+    <template v-else>
+      <div class="flex items-center justify-center h-20">
+        <UIcon name="i-lucide-loader-circle" class="animate-spin" />
+      </div>
+    </template>
+    <div
+      class="flex flex-col items-center text-center text-gray-500 mt-5 gap-0.5"
+    >
+      <p v-if="!relevantSubstitutions.length" class="my-2">
+        Keine Vertretungen unter diesem Filter.
+      </p>
       <!-- last fetched note -->
-      <div class="text-center text-gray-500">
+      <p>
         Zuletzt überprüft:
         {{
           plan.lastFetch.toDate(tz).toLocaleString(locale, {
@@ -69,7 +125,7 @@ const openReportModal = () => {
             minute: "2-digit",
           })
         }}
-      </div>
+      </p>
       <!-- report button -->
       <UButton
         variant="link"

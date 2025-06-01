@@ -71,6 +71,15 @@ export async function parsePlan(
       ) as [BatchItem<"sqlite">, ...BatchItem<"sqlite">[]]
     );
   }
+
+  // Insert classes
+  const classes = substitutions.flatMap((sub) => sub.classes);
+  if (classes.length) {
+    await useDrizzle()
+      .insert(tables.courseClass)
+      .values(classes.map((name) => ({ name })))
+      .onConflictDoNothing();
+  }
 }
 
 function parsePdfRow(row: string[]) {

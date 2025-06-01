@@ -28,6 +28,10 @@ const calendarDateTime = customType<{ data: CalendarDateTime }>({
     new PortableCalendarDateTime(parseDateTime(value)),
 });
 
+export const courseClass = sqliteTable("Class", {
+  name: text().primaryKey(),
+});
+
 export const download = sqliteTable("Download", {
   hash: text().notNull().primaryKey(),
   firstFetch: calendarDateTime().notNull(),
