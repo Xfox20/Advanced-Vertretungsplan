@@ -103,9 +103,19 @@ provide(
         :substitution="sub"
       />
     </template>
-    <div class="flex flex-col items-center mt-5 gap-1.5">
+    <template v-else>
+      <div class="flex items-center justify-center h-20">
+        <UIcon name="i-lucide-loader-circle" class="animate-spin" />
+      </div>
+    </template>
+    <div
+      class="flex flex-col items-center text-center text-gray-500 mt-5 gap-0.5"
+    >
+      <p v-if="!relevantSubstitutions.length" class="my-2">
+        Keine Vertretungen unter diesem Filter.
+      </p>
       <!-- last fetched note -->
-      <div class="text-center text-gray-500">
+      <p>
         Zuletzt überprüft:
         {{
           plan.lastFetch.toDate(tz).toLocaleString(locale, {
@@ -115,7 +125,7 @@ provide(
             minute: "2-digit",
           })
         }}
-      </div>
+      </p>
       <!-- report button -->
       <UButton
         variant="link"
