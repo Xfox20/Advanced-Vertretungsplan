@@ -98,10 +98,12 @@ provide(
         </span>
         <USwitch v-model="filteringEnabled" size="sm" />
       </div>
-      <SubstitutionCard
-        v-for="sub in relevantSubstitutions"
-        :substitution="sub"
-      />
+      <div class="flex flex-col gap-5 md:grid md:grid-cols-2 lg:flex">
+        <SubstitutionCard
+          v-for="sub in relevantSubstitutions"
+          :substitution="sub"
+        />
+      </div>
     </template>
     <template v-else>
       <div class="flex items-center justify-center h-20">
