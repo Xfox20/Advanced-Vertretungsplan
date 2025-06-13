@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const sub = inject<Substitution>("sub");
+const filteringActive = inject("filteringActive", ref(true));
 
 const hasRoomChange = computed(
   () =>
@@ -49,13 +50,19 @@ const hasRoomChange = computed(
   </div>
   <div
     v-if="sub.substitution"
-    class="bg-[var(--ui-secondary)]/15 p-1.5 rounded-md border-[1.5px] border-[var(--ui-secondary)] hidden lg:block"
+    class="bg-[var(--ui-secondary)]/15 p-1.5 rounded-md border-[1.5px] border-[var(--ui-secondary)] hidden lg:flex items-center gap-3"
   >
+    <h3
+      v-if="filteringActive"
+      class="font-extrabold text-[var(--ui-secondary)]"
+    >
+      Vertr.
+    </h3>
     <div
       :class="
         sub.substitution?.room?.length > 15
           ? 'flex flex-col items-start gap-1'
-          : 'flex flex-row justify-between items-center gap-7'
+          : 'flex flex-row justify-between items-center gap-7 w-full'
       "
     >
       <!-- subject & teacher -->

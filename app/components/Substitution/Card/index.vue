@@ -74,6 +74,7 @@ const gridTemplateClass = computed(() =>
     <span v-if="!filteringActive"> {{ sub.classes.join(", ") }}</span>
     <span class="font-light">
       {{ sub.hours.map((h) => h + ".").join(sub.hours.length < 3 ? "/" : ",") }}
+      <span v-if="filteringActive">Std.</span>
     </span>
     <div class="font-semibold">
       {{
