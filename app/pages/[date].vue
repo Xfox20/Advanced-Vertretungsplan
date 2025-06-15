@@ -58,7 +58,7 @@ watch(selectedDate, () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen">
+  <div class="flex flex-col items-center h-screen">
     <UContainer class="px-5 py-8 m-0 grow min-h-none">
       <!-- still loading plan -->
       <main
