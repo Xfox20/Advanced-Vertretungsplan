@@ -25,11 +25,6 @@ const minutesSinceLastFetch = computed(() =>
     : undefined
 );
 
-async function fetchPlan() {
-  await $fetch("/api/admin/fetchPlan");
-  await refreshLastFetch();
-}
-
 const { data: reports } = useFetch("/api/admin/reports");
 </script>
 
@@ -38,7 +33,7 @@ const { data: reports } = useFetch("/api/admin/reports");
     <h1 class="text-3xl font-extrabold text-center mb-6">Hey, admin!</h1>
     <UCard class="mb-8">
       <template #header>
-        <h2 class="font-bold text-lg">Fetch the plan</h2>
+        <h2 class="font-bold text-lg">Fetching status</h2>
       </template>
       <p
         v-if="minutesSinceLastFetch !== undefined && minutesSinceLastFetch < 5"
@@ -50,21 +45,13 @@ const { data: reports } = useFetch("/api/admin/reports");
             minutesSinceLastFetch === 1 ? "" : "s"
           }}</span
         >
-        ago. You can re-fetch it now.
+        ago.
       </p>
       <p v-else class="mb-2">
         The plan hasn’t been fetched<span v-if="lastFetch">
           in the past {{ minutesSinceLastFetch }} minutes</span
-        >. You can fetch it now.
+        >.
       </p>
-      <UButton
-        color="neutral"
-        variant="subtle"
-        block
-        loading-auto
-        @click="fetchPlan"
-        >Fetch plan</UButton
-      >
     </UCard>
     <UCard class="mb-8">
       <template #header>
