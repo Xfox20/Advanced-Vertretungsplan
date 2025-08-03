@@ -5,7 +5,9 @@ This is a little web app I made for fellow students of my school to view the sub
 Every day, the substitution plan gets uploaded to an itslearning course in PDF format. This is often annoying and slow to open though, so I had the idea to write a script that automatically logs in, downloads the plan and provides it to the students.
 And why not combine that with an awesome interface?
 
-![Screenshot](readme-screenshot.png)
+<div align=center>
+  <img src="readme-screenshot.png" height="450">
+</div>
 
 So, this is Advanced Vertretungsplan!
 
